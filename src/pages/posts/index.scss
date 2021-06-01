@@ -1,0 +1,35 @@
+.posts-container{
+  font-size: 28px;
+  background-color: white;
+  .search{
+    background-color: #F3F3F3;
+    width: 710px;
+    height: 70px;
+    border-radius: 35px;
+    margin: 20px;
+    .input{
+      height: 70px;
+      padding: 0 30px;
+    }
+    .input-holder{
+      position: absolute;
+      top: 39px;
+      left: 260px;
+      color: #FFA8C2;
+      font-size: 24px;
+      height: 33px;
+      line-height: 33px;
+      width: 190px;
+      .icon{
+        width: 26.39px;
+        height: 26.33px;
+        vertical-align: middle;
+        margin-right: 20px;
+      }
+    }
+   
+  }
+  .posts{
+    border-top: 10px solid #F3F3F3;
+  }
+}

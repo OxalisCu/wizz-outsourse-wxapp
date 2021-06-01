@@ -1,0 +1,74 @@
+.head-container{
+  height: 80px;
+  display: flex;
+  .avatar{
+    flex: 0 0 auto;
+    margin-right: 10px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+  }
+  .head{
+    flex: 1 1 auto;
+    display: flex;
+    .postmsg{
+      flex: 1 1 auto;
+      .username{
+        line-height: 40px;
+        .title{
+          margin-left: 10px;
+          line-height: 30px;
+          background-color: #FF4D82;
+          padding: 2px 15px;
+          border-radius: 20px;
+          color: white;
+          font-size: 22px;
+        }
+      }
+      .time{
+        margin-top: 7px;
+        line-height: 33px;
+        font-size: 24px;
+        color: #999999;
+      }
+    }
+    .more{
+      flex: 0 0 auto;
+      position: relative;
+      display: flex;
+      align-items: center;
+      .icon{
+        width: 32px;
+        height: 6.5px;
+        // background-color: grey;   // icon
+      }
+      .post-manage{
+        display: none;
+      }
+    }
+    .more-active{
+      .post-manage{
+        display: inline-block;
+        line-height: 70px;
+        width: 222px;
+        position: absolute;
+        right: 42px;
+        background-color: #666666;
+        color: white;
+        border-radius: 5px;
+        font-size: 28px;
+        Text{
+          line-height: 40px;
+          margin: 15px 30px;
+          display: inline-block;
+          &:first-child{
+            margin-right: 25px;
+          }
+          &:last-child{
+            margin-left: 25px;
+          }
+        }
+      }
+    } 
+  }
+}

@@ -1,0 +1,39 @@
+.comment-container{
+  margin-top: 30px;
+  .head{
+  }
+  .main-content{
+    margin: 20px 0 20px 90px;
+  }
+  .preview{
+    margin-left: 90px;
+    padding: 30px 11px 30px 30px;
+    background-color: #F9F9F9;
+    .comment-item,.reply-item{
+      line-height: 50px;
+      margin-bottom: 10px;
+    }
+    .name{
+      color: #729BBB;
+    }
+    .content{
+      color: #666666;
+    }
+    .reply-item{
+      color: #999999;
+      .between{
+        margin: 0 10px;
+      }
+    }
+    View:last-child{
+      margin-bottom: 0;
+    }
+    .more{
+      display: inline-block;
+      color: #FB89AB;
+    }
+    .more:active{
+      background-color: whitesmoke;
+    }
+  }
+}
