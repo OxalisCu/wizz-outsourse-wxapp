@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-demo
 =======
 # wizz-outsourse
 
@@ -28,5 +26,3 @@ demo
 2.  新建 Feat_xxx 分支
 3.  提交代码
 4.  新建 Pull Request
-
->>>>>>> 6f84d21fb354e362bbe74e313a237d8b4582f50a
