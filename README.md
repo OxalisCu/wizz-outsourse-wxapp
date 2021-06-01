@@ -1,24 +1,32 @@
-=======
 # wizz-outsourse
 
 #### 介绍
 为之外包，懂站迭代第三版
 
 #### 软件架构
-软件架构说明
+taro、react、ts
 
 
-#### 安装教程
+#### 编译运行
+```
+# yarn
+$ yarn dev:weapp
+$ yarn build:weapp
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+# npm
+$ npm run dev:weapp
+$ npm run build:weapp
+```
 
-#### 使用说明
+#### 开发
+下载依赖
+```
+# yarn
+$ yarn
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+# npm
+$ npm install
+```
 
 #### 参与贡献
 
