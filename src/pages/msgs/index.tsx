@@ -27,12 +27,13 @@ export default (props) => {
   return (
     <View className='msgs-container'>
       {
-        messageMsg.map((item) => {
+        messageMsg.map((item, index) => {
           return (
-            <View className='out-container'>
+            <View className='out-container' key={index}>
               <MessageCard
-              type='消息'
-              messageMsg={item} />
+                type='消息'
+                messageMsg={item} 
+              />
             </View>
           )
         })

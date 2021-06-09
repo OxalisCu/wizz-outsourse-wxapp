@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from 'react'
 import {View, Text, Input} from '@tarojs/components'
 import UserCard from '../../components/posts/userCard/index'
-import CommentEditor from '../../components/posts/commentEditor/index'
+import CommentBar from '../../components/posts/commentBar/index'
+import Modal from '../../components/modal/index'
 
 import './index.scss'
 
@@ -28,26 +29,25 @@ export default () => {
       to: '路易斯'
     }
   ]
-  
-  const [commentBox, setCommentBox] = useState(false);
 
   return (
     <View className='comment-detail'>
       <View className='detail-head'>
         <UserCard
-        editable={false}
-        userMsg={userMsg} />
+          userMsg={userMsg} 
+        />
         <View className='main-content'>谢谢大家的支持！！</View>
       </View>
       <View className='detail-body'>
         <Text className='title'>回复</Text>
         {
-          commentDetail.map((item) => {
+          commentDetail.map((item, index) => {
             return (
-              <View className='reply-item'>
+              <View className='reply-item' key={index}>
                 <UserCard
-                editable={false}
-                userMsg={userMsg} />
+                  editable={false}
+                  userMsg={userMsg} 
+                />
                 <View className='reply-content'>
                   {
                     (item.to == '帖子') ? (
@@ -55,9 +55,7 @@ export default () => {
                         <Text>{'回复 '}</Text>
                         <Text>{userMsg.username + '：'}</Text>
                       </Text>
-                    ) : (
-                      <View />
-                    )
+                    ) : ('')
                   }
                   <Text className='reply-text'>{item.content}</Text>
                 </View>
@@ -67,22 +65,9 @@ export default () => {
         }
       </View>
 
-      {
-        commentBox ? (
-          <CommentEditor
-          to={userMsg.username}
-          type='评论' />
-        ) : (
-          <View className='over'>
-            <Input
-            className='input'
-            placeholder='文明发言'
-            placeholderClass='input-holder'
-            onFocus={()=>{setCommentBox(true)}}
-            />
-          </View>
-        )
-      }
+      <CommentBar detail />
+
+      <Modal page='commentDetail' />
     </View>
   )
 }

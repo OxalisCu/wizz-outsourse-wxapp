@@ -1,5 +1,6 @@
 .posts-container{
   font-size: 28px;
+  color: #333333;
   background-color: white;
   .search{
     background-color: #F3F3F3;
@@ -31,5 +32,52 @@
   }
   .posts{
     border-top: 10px solid #F3F3F3;
+    .post-item{
+    }
+    .pay-btn{
+      height: 80px;
+      width: 600px;
+      margin: auto;
+      font-size: 32px;
+      border-radius: 30px;
+      border:1px solid #FFA8C2;
+      color: grey;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .bottom-more{
+      margin: 20px 0 63px;
+      text-align: center;
+      color: #D5D5D5;
+    }
+    .bottom-pay{
+      margin: 20px 0 59px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      Text{
+        line-height: 40px;
+        &:first-child{
+          color: #999999;
+        }
+        &:last-child{
+          margin-top: 10px;
+          color: #FB89AB;
+        }
+      }
+    }
+  }
+  .edit-btn{
+    position: fixed;
+    bottom: 50px;
+    right: 20px;
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    .icon{
+      width: 100%;
+      height: 100%;
+    }
   }
 }

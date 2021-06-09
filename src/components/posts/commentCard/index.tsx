@@ -2,71 +2,78 @@ import React, {useState, useEffect} from 'react'
 import {View, Text, Image} from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import UserCard from '../userCard/index'
+import CommentPre from '../commentPreview/index'
+import {useStore} from '../../../model/store/index'
+import {CommentItem, UserMsg} from '../../../model/api/index'
 
 import './index.scss'
 
 export default (props) => {
+  const commentItem: Array<CommentItem> = props.commentItem;
 
-  const commentMsg = props.commentMsg;    // 评论信息
-  const userMsg = props.userMsg;
-  const detail = props.detail;    // 是否为详情页
+  const [userMsg, setUserMsg] = useState<UserMsg>();
+  const [previewMsg, setPreviewMsg] = useState<Array<CommentItem>>([]);
 
-  const [deleteBtn, setDeleteBtn] = useState(false);    // 是否显示评论删除按钮
+  const [state1, actions1] = useStore('Mask');
+  const [state2, actions2] = useStore('Data');
 
-  const viewReply = () => {    // 查看帖子详情，查看评论
+  useEffect(() => {
+    if(commentItem != null && commentItem.length != 0){
+      setUserMsg({
+        creator: commentItem[0].user,
+        creatorName: commentItem[0].userName,
+        avatar: commentItem[0].userAvatar,
+        createTime: commentItem[0].createTime,
+        userType: commentItem[0].userType
+      })
+      setPreviewMsg(commentItem);
+    }
+  }, [])
+
+  const viewDetail = () => {    // 查看帖子详情
     Taro.navigateTo({
-      url: '../commentDetail/index'
+      url: '../postDetail/index'
     })
   }   
 
-  return (
+  const commentDelete = (e) => {   // 删除评论或回复
+    actions1.setMask({
+      mask: 'commentDelete',
+      page: 'postDetail'
+    });
+  }
+
+  const commentEditor = () => {    // 评论
+    actions1.setMask({
+      mask: 'commentEditor',
+      page: 'postDetail'
+    });
+    actions2.setData({
+      id: previewMsg[0].id,
+      name: previewMsg[0].userName,
+      type: '回复'
+    });
+  }
+
+  return commentItem != null && commentItem.length != 0 && userMsg != null && previewMsg != null
+   && (
     <View className='comment-container'>
-      {
-        detail ? (
-          <UserCard
-          className='head'
-          editable={false}
-          userMsg={userMsg} />
-        ) : (
-          <View />
-        )
-      }
-      {
-        detail ? (
-          <View className='main-content'>
-            谢谢大家的支持！！
-          </View>
-        ) : (
-          <View />
-        )
-      }
-      <View className='preview'>
-      {
-        commentMsg.map((item, index) => {
-          if(index >= 5){
-            return (
-              <View className='more' onClick={viewReply}>查看全部评论</View>
-            )
-          }else if(item.to == '帖子'){
-            return (
-              <View className='comment-item'>
-                <Text className='name'>{item.username}：</Text>
-                <Text className='content'>{item.content}</Text>
-              </View>
-            )
-          }else{
-            return (
-              <View className='reply-item' onLongPress={()=>{setDeleteBtn(true)}}>
-                <Text className='name'>{item.username}</Text>
-                <Text className='between'>回复</Text>
-                <Text className='name'>{item.to}：</Text>
-                <Text className='content'>{item.content}</Text>
-              </View>
-            )
-          }
-        })
-      }
+      {/* 评论详情 */}
+      <UserCard
+        className='head'
+        editable={false}
+        userMsg={userMsg}
+      />
+  
+      <View className='main-content' onClick={commentEditor} onLongPress={commentDelete}>
+        {commentItem[0].content}
       </View>
+
+      {/* 评论或回复预览 */}
+      <CommentPre
+        detail
+        previewMsg={previewMsg} 
+      />
     </View>
   )
 }

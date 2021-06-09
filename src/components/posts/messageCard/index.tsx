@@ -1,21 +1,25 @@
 import React from 'react'
 import {View, Image, Text} from '@tarojs/components'
+import UserNav from '../userNav/index'
 
 import './index.scss'
 
 export default (props) => {
 
-  const messageMsg = props.messageMsg;
-  const type = props.type;
+  const {messageMsg, type} = props;
 
   return (
     <View className='message-container'>
       <View className='message-head'>
-        <Image className='avatar' src={messageMsg.avatar}></Image>
-        <Text className='username'>{messageMsg.username}</Text>
+        <UserNav>
+          <Image className='avatar' src={messageMsg.avatar}></Image>
+        </UserNav>
+        <UserNav>
+          <Text className='username'>{messageMsg.username}</Text>
+        </UserNav>
         {
-          messageMsg.type == '消息' ? (
-            <Text className='tip'>{'回复了你的' + messageMsg.type}</Text>
+          type == '消息' ? (
+            <Text className='tip'>{'回复了你的' + type}</Text>
           ) : ( '' )
         }
       </View>

@@ -1,5 +1,4 @@
 import Taro from '@tarojs/taro'
-import { HTTP_STATUS } from './status'
 import { base } from './base'
 import { logError } from './error'
 
@@ -14,11 +13,6 @@ type Method =
   | 'CONNECT'
   | undefined
 
-// let token = Taro.getStorageSync('token');
-// console.log('token-before', token);
-// if (!token) login()
-// console.log('params', params)
-
 const baseOptions = function <T>(params, method = 'GET' as Method) {
   let { url, data } = params
   let contentType = 'application/x-www-form-urlencoded'
@@ -32,41 +26,15 @@ const baseOptions = function <T>(params, method = 'GET' as Method) {
     method: method,
     header: {
       'content-type': contentType,
-      authorization: Taro.getStorageSync('token')
+      authorization: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIsImV4cCI6MTgwMzE2NjQxNSwiaWF0IjoxNjIzMTY2NDE1fQ.J6VNcsq2GwXyu9wWshT9tqlF6Ga_yBKGGGsPHGnSwQo'
     },
     success(res) {
-      if (res.header.authorization) {
-        try {
-          // token
-          // console.log('token', res.header.authorization);
-          // console.log('demo', res);   // id
-          Taro.setStorageSync('token', res.header.authorization)
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      if (res.header.Authorization) {
-        try {
-          Taro.setStorageSync('token', res.header.Authorization)
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      if (res.statusCode === HTTP_STATUS.NOT_FOUND) {
-        return logError(url, '请求资源不存在')
-      } else if (res.statusCode === HTTP_STATUS.BAD_GATEWAY) {
-        return logError(url, '服务端出现了问题')
-      } else if (res.statusCode === HTTP_STATUS.FORBIDDEN) {
-        return logError(url, '没有权限访问')
-      } else if (res.statusCode === HTTP_STATUS.AUTHENTICATE) {
-        return logError(url, '没有登陆，无权限')
-      } else if (res.statusCode === HTTP_STATUS.SUCCESS) {
-        return res.data
+      if(!res.data.success){
+        logError(url, res.data.message)
       }
     },
     fail(err) {
-      let error = logError(url, '错误是' + err.errMsg)
-      return error
+      logError(url, err.errMsg)
     }
   }
 
@@ -81,5 +49,13 @@ export default {
   post<T>(url, data, contentType) {
     let params = { url, data, contentType }
     return baseOptions<T>(params, 'POST')
+  },
+  put<T>(url, data, contentType) {
+    let params = {url, data, contentType}
+    return baseOptions<T>(params, 'PUT')
+  },
+  delete<T>(url, data, contentType){
+    let params = {url, data, contentType}
+    return baseOptions<T>(params, 'DELETE')
   }
 }

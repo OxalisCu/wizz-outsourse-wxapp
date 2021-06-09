@@ -2,7 +2,7 @@ import { Component } from 'react'
 import './app.scss'
 
 class App extends Component {
-
+  
   componentDidMount () {}
 
   componentDidShow () {}

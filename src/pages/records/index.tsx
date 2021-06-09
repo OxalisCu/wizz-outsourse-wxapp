@@ -65,29 +65,39 @@ export default () => {
     })
   }, [])
 
+  // 打印用
+  // useEffect(() => {
+  //   Taro.getStorage({
+  //     key: 'token',
+  //     success: async function (res) {
+  //       console.log(res);
+  //     }
+  //   })
+  // }, [])
+
   return (
     <View className='records-container'>
       <AtMessage></AtMessage>
       {
-        (Taro.getStorageSync('token')) ? (
+        (Taro.getStorageSync('token')) ? ('') : (
           <LoginModal open={openLogin} trigger={trigger}></LoginModal>
-        ) : (
-          <View />
         )
       }
       <AtTabs 
-      className='record-tabs'
-      current={current}
-      tabList={recordTabs}
-      onClick={changeTab}>
-        <AtTabsPane current={current} index={current}>
+        className='record-tabs'
+        current={current}
+        tabList={recordTabs}
+        onClick={changeTab}
+      >
+        <AtTabsPane className='record-pane' current={current} index={current}>
           {
-            recordMsg.map((item) => {
+            recordMsg.map((item, index) => {
               return (
-                <View className='out-container'>
+                <View className='out-container' key={index}>
                   <MessageCard
-                  type='记录'
-                  messageMsg={item} />
+                    type='记录'
+                    messageMsg={item} 
+                  />
                 </View>
               )
             })

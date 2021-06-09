@@ -1,0 +1,19 @@
+.comment-bar-container{
+  font-size: 28px;
+  color: #333333;
+  position: fixed;
+  bottom: 0px;
+  background-color: white;
+  border-top: 5px solid #F3F3F3;
+  .input{
+    width: 710px;
+    height: 60px;
+    margin: 20px;
+    border-radius: 30px;
+    background-color: #F9F9F9;
+    padding: 0 30px;
+  }
+  .input-holder{
+    color: #D5D5D5;
+  }
+}

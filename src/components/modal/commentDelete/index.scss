@@ -1,0 +1,16 @@
+.delete-btn-container{
+  z-index: 100;
+  position: fixed;
+  width: 710px;
+  height: 150px;
+  top: calc(50vh - 75px);
+  left: 20px;
+  font-size: 36px;
+  background-color: white;
+  color: #333333;
+  text-align: center;
+  line-height: 150px;
+}
+.delete-btn-container:active{
+  background-color: whitesmoke;
+}

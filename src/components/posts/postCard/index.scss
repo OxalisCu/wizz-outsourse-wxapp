@@ -1,65 +1,16 @@
-// .at-tabs--scroll .at-tabs__header{
-//   height: 86px;
-// }
-
 .post-container{
   padding: 30px 20px 20px;
   font-size: 28px;
+  color: #333333;
   background-color: white;
 
   .card-head{
-
   }
 
   .card-content{
     margin-left: 90px;
   }
 
-  .card-comment{
-    // margin-left: 90px;   // 样式显示不了？
-  }
-
-  .mask{
-    z-index: 99;
-    position: absolute;
-    top: -85px;
-    left: 0;
-    // background-color: #676767;
-    // opacity: 50%;
-    background-color: rgba(103, 103, 103, 0.5);
-    width: 100%;
-    height: 100vh;
-    .delete-btn{
-      z-index: 100;
-      width: 710px;
-      height: 150px;
-      margin: auto;
-      margin-top: calc(50vh - 75px);
-      left: 20px;
-      font-size: 36px;
-      background-color: white;
-      color: #333333;
-      text-align: center;
-      line-height: 150px;
-    }
-    .delete-btn:active{
-      background-color: whitesmoke;
-    }
-    CommentEditor{
-      z-index: 100;
-    }
-  }
-}
-
-.edit-btn{
-  position: fixed;
-  bottom: 50px;
-  right: 20px;
-  width: 86px;
-  height: 86px;
-  border-radius: 50%;
-  .icon{
-    width: 100%;
-    height: 100%;
+  .card-comment{ 
   }
 }

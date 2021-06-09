@@ -1,0 +1,19 @@
+.texts-container{
+  font-size: 28px;
+  color: #333333;
+  .content{
+    line-height: 44px;
+  }
+  .wrap{
+    height: 15*44px;
+    overflow: hidden;
+  }
+  .more-content{
+    color: #FB89AB;
+    display: inline-block;
+    margin-top: 20px;
+  }
+  .more-content:active{
+    background: whitesmoke;
+  }
+}
