@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro'
 import { base } from './base'
-import { logError } from './error'
+import { logError, logMsg } from './error'
 
 type Method =
   | 'GET'
@@ -19,19 +19,12 @@ const baseOptions = function <T>(params, method = 'GET' as Method) {
 
   contentType = params.contentType || contentType
   const option = {
-    isShowLoading: false,
-    loadingText: '正在加载',
     url: base + url,
-    data: data,
+    data: method === 'GET' || method === 'POST' && contentType === 'application/x-www-form-urlencoded' ? data : JSON.stringify(data),
     method: method,
     header: {
       'content-type': contentType,
-      authorization: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIsImV4cCI6MTgwMzE2NjQxNSwiaWF0IjoxNjIzMTY2NDE1fQ.J6VNcsq2GwXyu9wWshT9tqlF6Ga_yBKGGGsPHGnSwQo'
-    },
-    success(res) {
-      if(!res.data.success){
-        logError(url, res.data.message)
-      }
+      authorization: Taro.getStorageSync('token')
     },
     fail(err) {
       logError(url, err.errMsg)
@@ -39,6 +32,71 @@ const baseOptions = function <T>(params, method = 'GET' as Method) {
   }
 
   return Taro.request<T>(option)
+}
+
+const ossOptions = function<T>(params, method){
+  let {url, data, contentType} = params;
+
+  const option = {
+    url,
+    data,
+    method,
+    header: {
+      'content-type': contentType,
+    },
+    success(res){
+      logMsg(url, res.data);
+    },
+    fail(err){
+      logError(url, err.errMsg);
+    }
+  }
+
+  return Taro.request<T>(option);
+}
+
+const loginOptions = function<T>(params, method){
+  let {url, data } = params;
+
+  let contentType = 'application/x-www-form-urlencoded'
+  contentType = params.contentType || contentType
+  const option = {
+    url,
+    data,
+    method,
+    header: {
+      'content-type': contentType,
+      authorization: Taro.getStorageSync('token')
+    },
+    success(res) {
+      console.log(res);
+      if (res.header.authorization) {
+        try {
+          Taro.setStorageSync('token', res.header.authorization)
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      if (res.statusCode === 404) {
+        return logError(url, '请求资源不存在')
+      } else if (res.statusCode === 502) {
+        return logError(url, '服务端出现了问题')
+      } else if (res.statusCode === 403) {
+        return logError(url, '没有权限访问')
+      } else if (res.statusCode === 444) {
+        return logError(url, '没有登陆，无权限')
+      } else if (res.statusCode === 200) {
+        return res.data
+      }else{
+        logError(url, res.statusCode);
+      }
+    },
+    fail(err){
+      logError(url, err.errMsg);
+    }
+  }
+
+  return Taro.request<T>(option);
 }
 
 export default {
@@ -57,5 +115,13 @@ export default {
   delete<T>(url, data, contentType){
     let params = {url, data, contentType}
     return baseOptions<T>(params, 'DELETE')
+  },
+  oss<T>(url, data, contentType){
+    let params = {url, data, contentType}
+    return ossOptions<T>(params, 'PUT')
+  },
+  login<T>(url, data, contentType, method){
+    let params = {url, data, contentType}
+    return loginOptions<T>(params, method)
   }
 }

@@ -1,44 +1,71 @@
 import React, { useEffect, useState } from 'react';
-import Taro, {useReady} from '@tarojs/taro'
+import Taro, {useDidShow, useReady} from '@tarojs/taro'
 import {View, Text} from '@tarojs/components'
-import {useStore} from '../../../../model/store/index'
+import {UserExp} from '../../../../model/api/index'
 
 import './index.scss'
 
 export default (props) => {
   const {content, detail, id} = props;
   const [wrap, setWrap] = useState(false);
+  const [height, setHeight] = useState(0); 
+
   const idStr = detail ? '' : 'id-'+id;
 
-  const [state4, actions4] = useStore('Query');
+  const [userExp, setUserExp] = useState<UserExp>();
 
-  useReady(() => {
-    if(detail) return
+  useEffect(() => {
+    try{
+      let exp = Taro.getStorageSync('userExp');
+      if(exp){
+        setUserExp(exp);
+      }
+    }catch(err){console.log(err)}
+  }, [])
 
-    const query = Taro.createSelectorQuery();
-    query
-    .select('#' + idStr)
-    .boundingClientRect((rect) => {
-      console.log(rect);
-      var height = rect.height;     // 高度 px
-      var pixelRatio;             // 倍率 dpr
-      Taro.getSystemInfo()
-      .then(res => pixelRatio = res.pixelRatio)
-      .then(()=>{
-        if(height*pixelRatio > 15*44){
-          console.log(height*pixelRatio);
-          setWrap(true);
+  useEffect(() => {
+    const time = setInterval(()=>{
+      // console.log('demo');
+
+      const query = Taro.createSelectorQuery();
+      query
+      .select('#' + idStr)
+      .boundingClientRect((rect) => {
+        // console.log(rect);
+        if(rect == null){
+          return;
+        }else{
+          clearInterval(time);
         }
+        var h = rect.height;     // 高度 px
+        // console.log('height',h);
+        setHeight(rect.height);
+        var pixelRatio;             // 倍率 dpr
+        Taro.getSystemInfo()
+        .then(res => pixelRatio = res.pixelRatio)
+        .then(()=>{
+          if(h*pixelRatio > 15*44){
+            // console.log(h*pixelRatio);
+            setWrap(true);
+          }
+        })
       })
-    })
-    .exec()
-  })
+      .exec()
+    }, 100)
+  }, [])
 
   const viewDetail = () => {
+    if(userExp.type == 0){
+      Taro.showToast({
+        title: '免费用户不能查看帖子详情',
+        icon: 'none'
+      })
+      return;
+    }
+
     Taro.navigateTo({
-      url: '../postDetail/index'
+      url: '../postDetail/index?id=' + id,
     })
-    actions4.setQuery(id);
   }
 
   return (

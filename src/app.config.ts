@@ -6,6 +6,7 @@ export default {
     'pages/postDetail/index',
     'pages/commentDetail/index',
     'pages/postEditor/index',
+    'pages/user/index',
   ],
   window: {
     backgroundTextStyle: 'light',

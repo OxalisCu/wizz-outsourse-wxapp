@@ -10,19 +10,16 @@ export default (props) => {
   const id = props.id;
   const name = props.name;
 
-  const [state1, actions1] = useStore('Mask');
-  const [state2, actions2] = useStore('Data');
+  const [mState, mActions] = useStore('Modal');
 
   const commentEditor = () => {
-    actions1.setMask({
+    mActions.openModal({
       mask: 'commentEditor',
-      page: detail ? 'commentDetail' : 'postDetail'
-    })
-    actions2.setData({
+      page: detail ? 'commentDetail' : 'postDetail',
       id: id,
       name: name,
       type: '评论'
-    });
+    })
   }
 
   return (

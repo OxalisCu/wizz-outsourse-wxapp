@@ -5,7 +5,8 @@ import Texts from './texts/index'
 import Imgs from './imgs/index'
 import Likers from './likers/index'
 import {useStore} from '../../../model/store/index'
-import {putLike, deleteLike, UserInfo, ContentMsg, ZoneMsg, LikeMsg} from '../../../model/api/index'
+import {putLike, deleteLike, UserInfo, ContentMsg, ZoneMsg, LikeMsg, UserExp, UserMsg} from '../../../model/api/index'
+import { timeFormat } from '../../../utils'
 
 import './index.scss'
 
@@ -22,51 +23,66 @@ interface Zone{
 
 export default (props) => {
   const detail: boolean = props.detail;
-  const userInfo: UserInfo = props.userInfo;
+  const userMsg: UserMsg = props.userMsg;
   const contentMsg: ContentMsg = props.contentMsg;
   const zoneMsg: ZoneMsg = props.zoneMsg;
-
   const [likeMsg, setLikeMsg] = useState<LikeMsg>(props.likeMsg);
+
+  const commentEditor = props.commentEditor;
+
   const [zones, setZones] = useState<Array<Zone>>([]);
 
-  const [state1, actions1] = useStore('Mask');
-  const [state2, actions2] = useStore('Data');
-  const [state3, actions3] = useStore('Zones');
+  const [userExp, setUserExp] = useState<UserExp>();
+  const [nickName, setNickName] = useState<string>();
+
+  const [mState, mActions] = useStore('Modal');
 
   useEffect(() => {
-    setZones(state3.zones);
-  }, [state3.zones])
+    try{
+      let zone = Taro.getStorageSync('zones');
+      if(zone){
+        setZones(zone);
+      }
+    }catch(err){console.log(err)}
+  }, [])
+
+  useEffect(() => {
+    try{
+      let exp = Taro.getStorageSync('userExp');
+      let name = Taro.getStorageSync('nickName');
+      if(exp && name){
+        setUserExp(exp);
+        setNickName(name);
+        // console.log(exp,name);
+      }
+    }catch(err){console.log(err)}
+  }, [])
 
   // 将用户点赞放在第一位
-  // useEffect(() => {
-  //   if(likeMsg.isLiked){
-  //     let temp = likeMsg;
-  //     temp.likers.map((item, index) => {
-  //       if(item.id == userInfo.id){
-  //         let demo = item;
-  //         temp.likers.splice(index, 1);
-  //         temp.likers.unshift(demo);
-  //       }
-  //     })
-  //   }
-  // }, [])
+  useEffect(() => {
+    if(likeMsg.isLiked && userExp){
+      let temp = likeMsg;
+      temp.likers.map((item, index) => {
+        if(item.id == userExp.id){
+          let demo = item;
+          temp.likers.splice(index, 1);
+          temp.likers.unshift(demo);
+        }
+      })
+    }
+  }, [likeMsg, userExp])
 
-  const commentEditor = () => {
-    actions1.setMask({
-      mask: 'commentEditor',
-      page: 'posts'
-    });
-    actions2.setData({
-      id: contentMsg.id,
-      name: userInfo.name,
-      type: '评论'
-    });
-  }
-  
   const like = () => {    // 点赞
     ;(
       async () => {
-        console.log('demo1');
+        if(userExp.type == 0){
+          Taro.showToast({
+            title: '免费用户不能点赞',
+            icon: 'none'
+          })
+          return;
+        }
+
         let likeRes;
         if(likeMsg.isLiked){
           likeRes = await deleteLike({
@@ -77,7 +93,7 @@ export default (props) => {
             id: contentMsg.id
           })
         }
-        console.log('likeRes',likeRes);
+        // console.log('likeRes',likeRes);
         if(likeRes.data.success){
           let temp: LikeMsg = {
             isLiked: false,
@@ -88,18 +104,22 @@ export default (props) => {
             temp.isLiked = false;
             temp.likeCount = likeMsg.likeCount - 1;
             temp.likers = likeMsg.likers;
-            // likeMsg.likers.map((item, index) => {   // 清除用户点赞数据
-            //   if(user.id == item.id){
-            //     temp.likers.splice(index, 1);
-            //   }
-            // })
+            likeMsg.likers.map((item, index) => {   // 清除用户点赞数据
+              if(userExp.id == item.id){
+                temp.likers.splice(index, 1);
+              }
+            })
           }else{
             temp.isLiked = true;
             temp.likeCount = likeMsg.likeCount + 1;
             temp.likers = likeMsg.likers;
-            // temp.likers = temp.likers.unshift(user);
+            temp.likers.unshift({
+              id: userExp.id,
+              name: nickName
+            });
           }
           setLikeMsg(temp);
+          // console.log(temp);
         }else{
           Taro.showToast({
             title: likeRes.data.message,
@@ -112,7 +132,7 @@ export default (props) => {
 
   return (
     <View className='content-container'>
-      {/* 帖子内容 */}
+
       <View className={'content-text' + (detail ? ' content-text-detail' : '')}>
         <Texts
           detail={detail}
@@ -120,53 +140,56 @@ export default (props) => {
           id={contentMsg.id}
         />
       </View>
-      {/* 帖子图片、文件 */}
+
       <View className='content-imgs'>
         <Imgs
           detail={detail}
-          images={contentMsg.pictures}
-          files={contentMsg.files}
+          images={contentMsg.pictures || []}
+          files={contentMsg.files || []}
         />
       </View>
+
       <View className='component'>
-        {/* 帖子分区 */}
+
         <View className='zones'>
           {
             zoneMsg.awesome && (
-              <View>
+              <View className='zone-awesome'>
                 <Image className='icon' src={jing_active}></Image>
                 精品
               </View>
             )
           }
-          <View className='zone-item'>
+          {
+            zones.length == 16 && zoneMsg.zone > 0 && <View className='zone-item'>
             <Text>#</Text>
-            <Text>{(zones != null && zones.length != 0) && zones[zoneMsg.zone].title}</Text>
+            <Text>{zones[zoneMsg.zone].title}</Text>
           </View>
+          }
         </View>
-        {/* 首页点赞和评论图标 */}
+
         {
           !detail && (
             <View className='operate'>
-              <Image className='comment' src={pinglun} onClick={commentEditor}></Image>
+              <Image className='comment' src={pinglun} onClick={()=>{commentEditor(false)}}></Image>
               <Image className='like' src={likeMsg.isLiked ? zan_active : zan} onClick={like}></Image>
             </View>
           )
         }
       </View>
-      {/* 帖子编辑时间 */}
+
       {
         detail && (
-          <View className='last-edit'>最后编辑时间：{contentMsg.last_update}</View>
+          <View className='last-edit'>最后编辑时间：{contentMsg.last_update == null ? timeFormat(userMsg.createTime) : timeFormat(contentMsg.last_update)}</View>
         )
       }
-      {/* 点赞列表 */}
+
       <View className='likes'>
         <Likers
           likeMsg={likeMsg}
         />
       </View>
-      {/* 详情页点赞图标 */}
+
       {
         detail && (
           <View className='like-bottom' onClick={like}>

@@ -1,4 +1,4 @@
-.comment-detail{
+.comment-detail-container{
   min-height: 100vh;
   background-color: white;
   font-size: 28px;
@@ -27,6 +27,9 @@
         }
         .reply-tip Text:last-child{
           color: #729BBB;
+        }
+        .reply-text{
+          word-break: break-all;
         }
       }
     }

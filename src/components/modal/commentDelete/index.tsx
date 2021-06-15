@@ -1,16 +1,36 @@
 import React from 'react'
+import Taro from '@tarojs/taro'
 import {View} from '@tarojs/components'
 import {useStore} from '../../../model/store/index'
+import { delComment } from '../../../model/api'
 
 import './index.scss'
 
 export default () => {
 
-  const [state1, actions1] = useStore('Mask');
-  const [state2, actions2] = useStore('Data');
+  const [mState, mActions] = useStore('Modal');
 
-  const deleteComment = () => {
-    actions1.setMask('');
+  const deleteComment = async () => {
+
+    const delRes = await delComment({
+      id: mState.id
+    })
+    console.log(mState);
+    if(delRes.data.success){
+      Taro.showToast({
+        title: '评论删除成功',
+        icon: 'none'
+      })
+      mActions.closeModal({
+        success: 'commentDelete'
+      })
+    }else{
+      Taro.showToast({
+        title: delRes.data.message,
+        icon: 'none'
+      })
+    }
+    
   }
 
   return (

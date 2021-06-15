@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import Taro from '@tarojs/taro'
+import Taro, { useRouter } from '@tarojs/taro'
 import {View} from '@tarojs/components'
 import UserCard from '../../components/posts/userCard'
 import ContentCard from '../../components/posts/contentCard'
 import CommentCard from '../../components/posts/commentCard'
 import CommentBar from '../../components/posts/commentBar'
 import Modal from '../../components/modal/index'
+import {getPostDetail, PostMsg, UserInfo, UserMsg, ContentMsg, ZoneMsg, LikeMsg, CommentMsg, CommentItem, UserExp} from '../../model/api/index'
 import {useStore} from '../../model/store/index'
-import {getPostDetail, PostMsg, UserInfo, UserMsg, ContentMsg, ZoneMsg, LikeMsg, CommentMsg, CommentItem} from '../../model/api/index'
-
-// 测试数据
-import {postsData} from '../../data/data'
 
 import './index.scss'
 
 export default () => {
+  const id = useRouter().params.id;
 
   const [postData, setPostData] = useState<PostMsg>();
 
@@ -25,30 +23,38 @@ export default () => {
   const [likeMsg, setLikeMsg] = useState<LikeMsg>();
   const [commentMsg, setCommentMsg] = useState<CommentMsg>();
 
-  const [state4, actions4] = useStore('Query');
+  const [userExp, setUserExp] = useState<UserExp>();
+  const [editCom, setEditCom] = useState<boolean>(false);
 
-  // 测试数据
+  const [mState, mActions] = useStore('Modal');
+
   useEffect(() => {
-    setPostData(postsData.data.records[0]);
+    try{
+      let exp = Taro.getStorageSync('userExp');
+      if(exp){
+        setUserExp(exp);
+        // console.log(exp,name);
+      }
+    }catch(err){console.log(err)}
   }, [])
 
-  // useEffect(() => {
-  //   ;(
-  //     async () => {
-  //       var postRes = await getPostDetail({
-  //         id: state4.id
-  //       })
-  //       if(postRes.data.success){
-  //         setPostData(postRes.data.data);
-  //       }else{
-  //         Taro.showToast({
-  //           title: postRes.data.message,
-  //           icon: 'none'
-  //         })
-  //       }
-  //     }
-  //   )()
-  // }, [])
+  useEffect(() => {
+    ;(
+      async () => {
+        var postRes = await getPostDetail({
+          id: id
+        })
+        if(postRes.data.success){
+          setPostData(postRes.data.data);
+        }else{
+          Taro.showToast({
+            title: postRes.data.message,
+            icon: 'none'
+          })
+        }
+      }
+    )()
+  }, [])
 
   useEffect(() => {
     if(postData != null){
@@ -69,7 +75,8 @@ export default () => {
         content: postData.content,
         pictures: postData.pictures,
         files: postData.files,
-        last_update: postData.last_update
+        last_update: postData.last_update,
+        pin: postData.pin
       })
       setZoneMsg({
         zone: postData.zone,
@@ -87,17 +94,71 @@ export default () => {
     }
   }, [postData])
 
+  const commentDelete = (item: CommentItem) => {
+    if(userExp.type == 6 || userExp.id == userMsg.creator || userExp.id == item.user){
+      mActions.openModal({
+        mask: 'commentDelete',
+        page: 'postDetail',
+        id: item.id,
+      })
+      setEditCom(true);
+    }
+  }
+
+  const commentEditor = (item: CommentItem) => {
+    mActions.openModal({
+      mask: 'commentEditor',
+      page: 'postDetail',
+      id: item.id,
+      name: item.userName,
+      type: '回复'
+    })
+    setEditCom(true);
+  }
+
+  useEffect(()=>{
+    if(mState.success == 'commentDelete' && setEditCom ){
+      let commentList: Array<Array<CommentItem>> = [];
+      commentMsg.comments.map((comment, i1) => {
+        if(comment[0].id != mState.id){
+          commentList.push(comment);
+        }
+      })
+      setCommentMsg({
+        commentCount: commentMsg.commentCount-1,
+        comments: commentList
+      })
+      setEditCom(false);
+      mActions.closeModal({
+        success: ''
+      })
+    }else if(mState.success == 'commentEditor' && mState.id == contentMsg.id){
+      console.log('dee');
+      let [...commentList] = commentMsg.comments;
+      setCommentMsg({
+        commentCount: commentMsg.commentCount+1,
+        comments: [[mState.comment]].concat(commentList)
+      });
+      setEditCom(false);
+      mActions.closeModal({
+        success: ''
+      })
+    }
+  }, [mState.success])
+
   return postData != null && userInfo != null && userMsg != null && contentMsg != null &&zoneMsg != null && likeMsg != null && commentMsg != null
     && (
     <View className='post-detail-container'>
       <View className='up'>
         <UserCard 
           userMsg={userMsg}
+          editable
+          postId={contentMsg.id}
         />
         
         <ContentCard
           detail
-          userInfo={userInfo}
+          userMsg={userMsg}
           contentMsg={contentMsg}
           zoneMsg={zoneMsg}
           likeMsg={likeMsg}
@@ -112,7 +173,9 @@ export default () => {
               return (
                 <View className='comment-list' key={index}>
                   <CommentCard
-                    commentItem={item} 
+                    previewMsg={item}
+                    commentDelete={commentDelete}
+                    commentEditor={commentEditor}
                   />
                 </View>
               )

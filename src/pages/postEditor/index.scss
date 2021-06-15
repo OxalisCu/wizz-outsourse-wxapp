@@ -70,8 +70,7 @@
           margin-right: 20px;
           margin-bottom: 20px;
         }
-        
-        .tag-item-active{
+        .choose{
           background-color: #FFEEF3;
           color: #FB89AB;
         }
@@ -89,5 +88,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+  .active{
+    background-color: #FB89AB;
   }
 }

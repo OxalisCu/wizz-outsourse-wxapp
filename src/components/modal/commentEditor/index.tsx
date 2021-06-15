@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import {View, Image, Text, Form, Button, Textarea} from '@tarojs/components'
+import Taro from '@tarojs/taro'
 import {removeSpace, countWords} from '../../../utils/index'
 import {useStore} from '../../../model/store/index'
+import { getUserExp, postComment, UserExp } from '../../../model/api'
 
 import biaoqing from '../../../images/biaoqing.png'
 
 import './index.scss'
 
 export default () => {
-  const [state1, actions1] = useStore('Mask');
-  const [state2, actions2] = useStore('Data');
+  const [mState, mActions] = useStore('Modal');
+
+  const [userExp, setUserExp] = useState<UserExp>();
+  const [nickName, setNickName] = useState();
+  const [userAvatar, setUserAvatar] = useState();
 
   var keyBoardHeight = 0;   // 存储键盘高度信息
 
@@ -17,15 +22,53 @@ export default () => {
   const [words, setWords] = useState(0);
   // const [bottomHeight, setBottomHeight] = useState(40);
 
+  useEffect(() => {
+    try{
+      const exp = Taro.getStorageSync('userExp');
+      const name = Taro.getStorageSync('nickName');
+      const avatar = Taro.getStorageSync('avatarUrl');
+      if(exp && name && avatar){
+        setUserExp(exp);
+        setNickName(name);
+        setUserAvatar(avatar);
+      }
+    }catch(err){console.log(err)}
+  }, [])
+
   const submitCom = (e) => {  //提交评论
     (
       async ()=>{
         setComment(removeSpace(e.detail.value.comment));
-        
-        actions1.setMask({
-          page: '',
-          mask: ''
-        });
+        console.log(e.detail.value.comment,mState);
+        const commentRes = await postComment({
+          toType: mState.type == '评论' ? '1' : '0',
+          toId: mState.id,
+          message: removeSpace(e.detail.value.comment)
+        })
+        if(commentRes.data.success){
+          Taro.showToast({
+            title: '评论发表成功',
+            icon: 'none'
+          })
+          mActions.commentMsg({
+            id: mState.id,
+            content: e.detail.value.comment,
+            createTime: new Date().getTime(),
+            reply: mState.type == '评论' ? null : mState.id,
+            user: userExp.id,
+            userAvatar: userAvatar,
+            userName: nickName,
+            userType: userExp.type
+          })
+          mActions.closeModal({
+            success: 'commentEditor'
+          })
+        }else{
+          Taro.showToast({
+            title: commentRes.data.message,
+            icon: 'none'
+          })
+        }
       }
     )()
   };   
@@ -50,7 +93,7 @@ export default () => {
   return (
     <View className='comment-editor-container' onClick={(e)=>{e.stopPropagation();}}>
       <Form onSubmit={submitCom}>
-        <View className='input-title'>{state2.data.type + ' ' + state2.data.name}</View>
+        <View className='input-title'>{mState.type + ' ' + mState.name}</View>
           <Textarea 
             className='input-area' 
             name='comment'

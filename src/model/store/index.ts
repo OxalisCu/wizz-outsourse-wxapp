@@ -1,10 +1,7 @@
 import { Model } from 'react-model'
-import Mask from './mask'
-import Data from './data'
-import Zones from './zones'
-import Query from './query'
+import Modal from './modal'
 
-const models = { Mask, Data, Zones, Query }
+const models = { Modal }
 
 export const {
   getInitialState,

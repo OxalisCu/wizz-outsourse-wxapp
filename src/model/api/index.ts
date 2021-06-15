@@ -17,6 +17,14 @@ interface LoginType {
 /**
  * @description首页
  */
+export interface UserExp{
+  id: number,
+  type: number,
+  expireTIme: number,
+  exp: number | null,
+  _last_Update: number
+}
+
 export interface ZoneItem{
   id: number,
   name: string
@@ -41,7 +49,8 @@ export interface ContentMsg{
   content: string,
   pictures: Array<string> | null,
   files: Array<string> | null,
-  last_update: number
+  last_update: number,
+  pin: boolean
 }
 
 export interface ZoneMsg{
@@ -95,24 +104,35 @@ interface PostRes{
 }
 
 /**
- * @description在下面定义接口
+ * @description登录接口
  */
 
 export const login = (params) => {
-  return Https.post<RequestRes<LoginType>>(
-    'xiaoLogin/grantAuthorization',
+  return Https.login<RequestRes<LoginType>>(
+    'https://www.blbldata.com/xiaoLogin/grantAuthorization',
     params,
-    undefined
+    undefined,
+    'POST'
   )
 }
 
-export const getNewToken = (id) => {
-  return Https.get<RequestRes<unknown>>('xiaoLogin/getAuthorityById',id)
-}
+// export const getNewToken = (params) => {
+//   return Https.login<RequestRes<unknown>>(
+//     'https://www.blbldata.com/xiaoLogin/getAuthorityById',
+//     params,
+//     undefined,
+//     'GET'
+//   )
+// }
+
 
 /**
  * @description测试接口
  */
+
+export const getUserExp = (params) => {
+  return Https.get<RequestRes<UserExp>>('user/' + params.id)
+}
 
 export const getZones = () => {
   return Https.get<RequestRes<Array<ZoneItem>>>('post/zone')
@@ -135,17 +155,31 @@ export const deleteLike = (params) => {
 }
 
 export const postComment = (params) => {
-  return Https.post<RequestRes<Comment>>('comment', params, 'application/json')
+  return Https.post<RequestRes<Comment>>('comment/', params, 'application/json')
 }
 
-export const deleteComment = (params) => {
-  // return Https.delete<RequestRes<Comment>>('comment')
+export const delComment = (params) => {
+  return Https.delete<RequestRes<Comment>>('comment/' + params.id, {}, 'application/json')
 }
 
 export const getFileUrl = (params) => {
   return Https.get<RequestRes<FileUrl>>('file/oss', params)
 }
 
+export const putFileOss = (url, data, contentType) => {
+  return Https.oss<RequestRes<undefined>>(url, data, contentType)
+}
+
 export const createPost = (params) => {
   return Https.post<RequestRes<PostRes>>('post', params, 'application/json')
+}
+
+export const delPost = (params) => {
+  return Https.delete<RequestRes<undefined>>('post/' + params.id, {}, 'application.json')
+}
+
+export const editPost = (params) => {
+  const {id,...data} = params;
+  console.log(data);
+  return Https.put<RequestRes<PostRes>>('post/' + id, data, 'application/json')
 }

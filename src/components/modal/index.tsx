@@ -10,23 +10,23 @@ import './index.scss'
 export default (props) => {
   const page = props.page;
 
-  const [state1, actions1] = useStore('Mask');
+  const [mState, mActions] = useStore('Modal');
 
   return (
-    state1.page == page && state1.mask && (
-      <View className='mask' catchMove onClick={(e)=>{actions1.setMask({mask: '', page: ''}); e.stopPropagation();}}>
+    mState.page == page && mState.mask && (
+      <View className='mask' catchMove onClick={(e)=>{mActions.closeModal({success: ''}); e.stopPropagation();}}>
         {
-          state1.mask == 'commentEditor' && (
+          mState.mask == 'commentEditor' && (
             <CommentEditor />
           )
         }
         {
-          state1.mask == 'commentDelete' && (
+          mState.mask == 'commentDelete' && (
             <CommentDelete />
           )
         }
         {
-          state1.mask == 'postCancel' && (
+          mState.mask == 'postCancel' && (
             <PostCancel />
           )
         }

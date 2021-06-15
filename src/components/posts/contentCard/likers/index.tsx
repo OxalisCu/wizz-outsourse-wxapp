@@ -16,10 +16,10 @@ export default (props) => {
       <Image className='icon' src={zan_small}></Image>
       {
         (likeMsg.likers != null) && likeMsg.likers.map((item, index) => {
-          if(index == likeMsg.likeCount-1 || index >= 20){
-            return (
+          if(index >= 20){
+            return index == 20 ? (
               <Text>等{likeMsg.likeCount}人觉得很赞</Text>
-            )
+            ) : ('')
           }else{
             return (
               <UserNav className='likers'>{(index == 0 ? '' : '，') + item.name}</UserNav>

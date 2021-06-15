@@ -1,9 +1,9 @@
-.imgs-container{
+.file-upload-container{
   display: flex;
   flex-wrap: wrap;
-  .img-item{
-    width: 200px;
-    height: 200px; 
+  .file-item{
+    width: 230px;
+    height: 230px; 
     margin-right: 10px;
     margin-top: 10px;
     .item{
@@ -41,14 +41,10 @@
       }
     }
   }
-  .img-item:nth-child(3n){
+  .file-item:nth-child(3n){
     margin-right: 0;
   }
-  .img-item:last-child{
+  .file-item:last-child{
     margin-right: 0;
-  }
-  .detail{
-    width: 230px;
-    height: 230px; 
   }
 }

@@ -4,7 +4,6 @@ import {
   AtModalHeader,
   AtModalContent,
   AtModalAction,
-  AtMessage
 } from 'taro-ui'
 import { Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
@@ -26,40 +25,57 @@ interface LoginType {
   detail: DetailType
 }
 
+interface ID{
+  ownId: number,
+  unionId: string
+}
+
+interface IdType{
+  errorCode: number,
+  errorMessage: string,
+  data: ID
+}
+
 export default (props) => {
-  const { open, trigger } = props
+  const { open, trigger, getIsLogin } = props
   const [isOpened, setIsOpened] = useState(false)
 
-  let getUserInfo = async (e: LoginType) => {
-    // iv...
-    // console.log('iv', e);
-    if (!e.detail.iv) {
+  const getUserProfile = async (e: LoginType) => {
+    // 微信登录，获取登录凭证
+    const UserRes = await Taro.getUserProfile({
+      desc: '获取登录信息',
+      lang: 'zh_CN'
+    })
+    // 用户未授权
+    if (!UserRes.iv) {
       Taro.atMessage({
-        message: `失败: ${e.detail.errMsg}`,
+        message: `失败: ${UserRes.errMsg}`,
         type: 'error'
       })
       return
     }
-    const { data } = await login({
+    
+    // 自定义登录
+    const data = await login({
       code: Taro.getStorageSync('code'),
-      iv: e.detail.iv,
-      encryptedData: e.detail.encryptedData
+      iv: UserRes.iv,
+      encryptedData: UserRes.encryptedData
     })
-    Taro.setStorageSync('nickName', e.detail.userInfo.nickName)
-    Taro.setStorageSync('avatarUrl', e.detail.userInfo.avatarUrl)
-
+    Taro.setStorageSync('nickName', UserRes.userInfo.nickName)
+    Taro.setStorageSync('avatarUrl', UserRes.userInfo.avatarUrl)
     // id
-    // console.log('id',data);
-
-    if (data.errorCode === 0) {
-      Taro.setStorageSync('id', data.data.id)
+    if (data.data.errorCode === 0) {
+      Taro.setStorageSync('id', data.data.data.ownId)
     } else {
       Taro.atMessage({
-        message: `失败: ${data.errorCode},${data.errorMessage}`,
+        message: `失败: ${data.data.errorCode},${data.data.errorMessage}`,
         type: 'error'
       })
     }
+
     setIsOpened(false)
+    getIsLogin(true);
+
     Taro.atMessage({
       message: '🎉开始访问吧',
       type: 'success'
@@ -76,7 +92,7 @@ export default (props) => {
       <AtModalContent>我们希望获取您的公开信息（头像，昵称），以为您提供更全面的服务</AtModalContent>
       <AtModalAction>
         <Button onClick={() => setIsOpened(false)}>取消</Button>
-        <Button openType='getUserInfo' onGetUserInfo={getUserInfo}>
+        <Button onClick={getUserProfile}>
           确定
         </Button>
       </AtModalAction>

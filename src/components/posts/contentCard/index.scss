@@ -21,24 +21,24 @@
       font-size: 30px;
       align-items: center;
       line-height: 42px;
-      .icon{
-        width: 23.81px;
-        height: 27.31px;
-        margin-right: 7px;
-      }
       View{
-        &:first-child{
-          color: #FB89AB;
-        }
         color: #333333;
         background-color: #FFEEF3;
         padding: 9px 20px;
         border-radius: 30px;
         margin-right: 10px;
-        Text:first-child{
-          margin-right: 8px;
-          color: #FB89AB;
+      }
+      .zone-awesome{
+        color: #FB89AB;
+        .icon{
+          width: 23.81px;
+          height: 27.31px;
+          margin-right: 7px;
         }
+      }
+      .zone-item Text:first-child{
+        margin-right: 8px;
+        color: #FB89AB;
       }
     }
     .operate{
