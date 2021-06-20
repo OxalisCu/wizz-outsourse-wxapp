@@ -1,0 +1,30 @@
+.records-container{
+  font-size: 28px;
+  color: #333333;
+  .at-tabs__header{
+    height: 86px;
+    .at-tabs__item{
+      height: 40px;
+      padding: 30px 20px 16px;
+      line-height: 40px;
+      .at-tabs__item-underline{
+        width: 42px;
+        height: 6px;
+        left: calc(50% - 21px);
+      }
+    }
+  }
+  .at-tabs__underline{
+    display: none;
+  }
+  .record-pane{
+    .out-container{
+      border-bottom: 10px solid #F3F3F3;
+    }
+    .bottom-more{
+      margin: 20px 0 63px;
+      text-align: center;
+      color: #D5D5D5;
+    }
+  }
+}

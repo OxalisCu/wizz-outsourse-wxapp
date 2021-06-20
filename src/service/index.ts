@@ -69,10 +69,15 @@ const loginOptions = function<T>(params, method){
       authorization: Taro.getStorageSync('token')
     },
     success(res) {
-      console.log(res);
       if (res.header.authorization) {
         try {
           Taro.setStorageSync('token', res.header.authorization)
+        } catch (error) {
+          console.log(error);
+        }
+      }else if(res.header.Authorization){
+        try {
+          Taro.setStorageSync('token', res.header.Authorization)
         } catch (error) {
           console.log(error);
         }

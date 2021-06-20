@@ -28,12 +28,13 @@ export const getUrl = function (str: string): string{
 
 // 判断是本地图片（文件）还是网络图片（文件）
 export const isUpload = function (str: string): boolean{
-  const reg = /^http:\/\/tmp/;
-  return !reg.test(str);
+  const reg1 = /^http:\/\/tmp/;
+  const reg2 = /^wxfile:/;
+  return !reg1.test(str) && !reg2.test(str);
 }
 
 // 时间转换
 export const timeFormat = function (time: number): string{
   const date = new Date(time);
-  return date.getFullYear() + '.' + (date.getMonth()+1) + '.' + date.getDay() + ' ' + date.getHours() + ':' + date.getMinutes();
+  return date.getFullYear() + '.' + (date.getMonth()+1) + '.' + (date.getDate()) + ' ' + date.getHours() + ':' + date.getMinutes();
 }

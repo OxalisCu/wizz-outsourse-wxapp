@@ -1,10 +1,12 @@
 import React, {useState, useEffect} from 'react'
 import Taro from '@tarojs/taro'
 import {View, Image, Text} from '@tarojs/components'
-import {getFileInfo} from '../../../../utils/index'
-import { imgExten, fileExten } from '../../../../service/type'
+import {getFileInfo, isUpload} from '../../../../utils/index'
 
 import './index.scss'
+
+// icon
+import errorImg from '../../../../images/error.jpg'
 
 interface ImgItem{
   src: string,
@@ -39,7 +41,7 @@ export default (props) => {
 
     images.map((item, index) => {
       imgsTemp.push({
-        src: item,
+        src: isUpload(item) ? item : errorImg,
         type: 'image'
       })
     })
@@ -57,8 +59,8 @@ export default (props) => {
       let info = decodeURIComponent(exten[0]);
       // console.log(info);
       fileTemp.push({
-        name: info,
-        fileType: exten[1].toUpperCase()
+        name: isUpload(item) ? info : '未知',
+        fileType: isUpload(item) ? exten[1].toUpperCase() : 'ERROR'
       })
     })
 
@@ -105,9 +107,9 @@ export default (props) => {
             <View className={'img-item' + (detail ? ' detail' : '')} key={item.src}>
               {
                 item.type == 'image' ? (
-                  <Image className='item image' src={item.src} mode='aspectFill' onClick={()=>previewImg(index)}></Image>
+                  <Image className='item image' src={item.src} mode='aspectFill' onClick={(e)=>{previewImg(index);e.stopPropagation();}}></Image>
                 ) : (        
-                  <View className='item file' onClick={()=>{previewFile(item.src)}}>
+                  <View className='item file' onClick={(e)=>{previewFile(item.src);e.stopPropagation();}}>
                     <Text className='type'>{(index - images.length < 0) ? '' : fileInfo[index - images.length].fileType}</Text>
                     <Text className='name'>{(index - images.length < 0) ? '' : fileInfo[index - images.length].name}</Text>
                   </View>

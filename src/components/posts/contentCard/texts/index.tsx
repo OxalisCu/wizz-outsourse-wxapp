@@ -8,7 +8,6 @@ import './index.scss'
 export default (props) => {
   const {content, detail, id} = props;
   const [wrap, setWrap] = useState(false);
-  const [height, setHeight] = useState(0); 
 
   const idStr = detail ? '' : 'id-'+id;
 
@@ -23,6 +22,7 @@ export default (props) => {
     }catch(err){console.log(err)}
   }, [])
 
+  // 文本折叠
   useEffect(() => {
     const time = setInterval(()=>{
       // console.log('demo');
@@ -39,7 +39,6 @@ export default (props) => {
         }
         var h = rect.height;     // 高度 px
         // console.log('height',h);
-        setHeight(rect.height);
         var pixelRatio;             // 倍率 dpr
         Taro.getSystemInfo()
         .then(res => pixelRatio = res.pixelRatio)
@@ -54,28 +53,14 @@ export default (props) => {
     }, 100)
   }, [])
 
-  const viewDetail = () => {
-    if(userExp.type == 0){
-      Taro.showToast({
-        title: '免费用户不能查看帖子详情',
-        icon: 'none'
-      })
-      return;
-    }
-
-    Taro.navigateTo({
-      url: '../postDetail/index?id=' + id,
-    })
-  }
-
   return (
     <View className='texts-container'>
-      <View id={idStr} className={wrap ? 'content wrap' : 'content'} onClick={()=>{if(!detail)viewDetail()}}>
-        {content}
+      <View id={idStr} className={wrap ? 'content wrap' : 'content'}>
+        <Text>{content}</Text>
       </View>
       {
         wrap && (
-          <Text className='more-content' onClick={viewDetail}>查看全文</Text>
+          <Text className='more-content'>查看全文</Text>
         )
       }
     </View>

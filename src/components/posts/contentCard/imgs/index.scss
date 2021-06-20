@@ -16,11 +16,12 @@
       .type{
         position: absolute;
         top: calc(50% - 28px);
-        left: calc(50% - 50px);
+        left: calc(50% - 100px);
         color: #FB89AB;
         font-size: 40px;
         height: 56px;
-        width: 100px;
+        width: 200px;
+        text-align: center;
       }
       .name{
         position: absolute;

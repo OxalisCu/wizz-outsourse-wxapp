@@ -28,6 +28,7 @@ export default (props) => {
   const zoneMsg: ZoneMsg = props.zoneMsg;
   const [likeMsg, setLikeMsg] = useState<LikeMsg>(props.likeMsg);
 
+  const viewDetail = props.viewDetail;
   const commentEditor = props.commentEditor;
 
   const [zones, setZones] = useState<Array<Zone>>([]);
@@ -130,10 +131,11 @@ export default (props) => {
     )()
   }   
 
+
   return (
     <View className='content-container'>
 
-      <View className={'content-text' + (detail ? ' content-text-detail' : '')}>
+      <View className={'content-text' + (detail ? ' content-text-detail' : '')} onClick={viewDetail}>
         <Texts
           detail={detail}
           content={contentMsg.content} 
@@ -141,7 +143,7 @@ export default (props) => {
         />
       </View>
 
-      <View className='content-imgs'>
+      <View className='content-imgs' onClick={viewDetail}>
         <Imgs
           detail={detail}
           images={contentMsg.pictures || []}
@@ -171,7 +173,7 @@ export default (props) => {
         {
           !detail && (
             <View className='operate'>
-              <Image className='comment' src={pinglun} onClick={()=>{commentEditor(false)}}></Image>
+              <Image className='comment' src={pinglun} onClick={()=>{commentEditor(null)}}></Image>
               <Image className='like' src={likeMsg.isLiked ? zan_active : zan} onClick={like}></Image>
             </View>
           )

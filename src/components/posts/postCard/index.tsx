@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Taro, { setBackgroundTextStyle, useTabItemTap } from '@tarojs/taro'
+import Taro from '@tarojs/taro'
 import {View, Image, Text} from '@tarojs/components'
 import UserCard from '../userCard/index'
 import ContentCard from '../contentCard/index'
@@ -44,30 +44,27 @@ export default (props) => {
     likers: postData.likers,
   }
 
-  const commentMsg: CommentMsg = {
+  const [commentMsg, setCommentMsg] = useState<CommentMsg>({
     commentCount: postData.commentCount,
     comments: postData.comments
-  }
+  })
 
   const [commentPreview, setCommentPreview] = useState<Array<CommentItem>>([]);
+  const [wrap, setWrap] = useState<boolean>(false);
 
   // 处理帖子评论（取出前五条首页展示
   useEffect(() => {
-    let num = 5;
     let preview = [];
-    if(commentMsg.commentCount == 0){
-      return;
-    }
     commentMsg.comments.map((comment, i1) => {
+      if(i1 >= 5) return;
       comment.map((item, i2) => {
+        if(i2 > 5) return;
         preview.push(item);
-        num --;
-        if(num < 0) return;
       })
-      if(num < 0) return;
     })
     setCommentPreview(preview);
-  }, [])
+    // console.log('preview',preview);
+  }, [commentMsg])
 
   useEffect(() => {
     try{
@@ -77,13 +74,6 @@ export default (props) => {
       }
     }catch(err){console.log(err)}
   }, [])
-
-  useEffect(() => {
-    if(mState.success == 'commentEditor'){
-      console.log(mState);
-      console.log(mState.success);
-    }
-  }, [mState.success])
 
   // 管理员、帖子发表者、评论发表者可删除评论
   const commentDelete = (item) => {
@@ -97,7 +87,7 @@ export default (props) => {
   }
 
   // 付费用户评论
-  const commentEditor = (preview) => {
+  const commentEditor = (item: CommentItem) => {
     if(userExp.type == 0){
       Taro.showToast({
         title: '免费用户不能评论',
@@ -109,67 +99,64 @@ export default (props) => {
     mActions.openModal({
       mask: 'commentEditor',
       page: 'posts',
-      id: contentMsg.id,
-      name: userMsg.creatorName,
-      type: preview ? '回复' : '评论'
+      id: item == null ? contentMsg.id : item.id,
+      name: item == null ? userMsg.creatorName : item.userName,
+      type: item == null ? '评论' : '回复'
     })
   }
 
   // 删除或添加评论
   useEffect(()=>{
+    let commentList = [];
     if(mState.success == 'commentDelete'){
-      let num = 5;
-      let preview = [];
       commentMsg.comments.map((comment, i1) => {
         if(comment[0].id == mState.id){   // 删除评论
           return;
         }
+        let temp = [];
         comment.map((item, i2) => { 
           if(item.id != mState.id){   // 删除回复
-            preview.push(item);
-            num --;
+            temp.push(item);
           }
-          if(num < 0) return;
         })
-        if(num < 0) return;
+        commentList.push(temp);
       })
-      setCommentPreview(preview);
-      mActions.closeModal({
-        success: ''
+      setCommentMsg({
+        commentCount: commentMsg.commentCount-1,
+        comments: commentList
       })
-    }else if(mState.success == 'commentEditor'){
-      let num = 5;
-      let preview = [];
-      if(mState.comment.reply == null){   // 评论
-        preview[0] = mState.comment;
-        num --;
-        commentMsg.comments.map((comment, i1) => {
-          comment.map((item, i2) => {
-            preview.push(item);
-            num --;
-            if(num < 0){return}
-          })
-          if(num < 0){return}
-        })
-      }else{    // 回复
-        commentMsg.comments.map((comment, i1) => {
-          comment.map((item, i2) => {
-            preview.push(item);
-            num --;
-            if(num < 0){return}
-            if(comment[0].id == mState.comment.reply && i2 == comment.length - 1){
-              preview.push(mState.comment);
-              num --;
-            }
-          })
-          if(num < 0){return}
-        })
-      }
-      setCommentPreview(preview);
       mActions.closeModal({
         success: '',
       })
-      mActions.commentMsg(null);
+    }else if(mState.success == 'commentEditor'){
+      if(mState.comment.reply == null){   // 评论，新发表放在最上面
+        [...commentList] = commentMsg.comments;
+        commentList.unshift([mState.comment]);  
+        setCommentMsg({
+          commentCount: commentMsg.commentCount+1,
+          comments: commentList
+        })
+        mActions.commentMsg(null);
+      }else{    // 回复，新发表放在最后
+        commentMsg.comments.map((comment, i1) => {
+          let temp = [];
+          comment.map((item, i2) => {
+            temp.push(item);
+            if(comment[0].id == mState.comment.reply && i2 == comment.length - 1){
+              temp.push(mState.comment);
+            }
+          })
+          commentList.push(temp);
+        })
+        setCommentMsg({
+          commentCount: commentMsg.commentCount+1,
+          comments: commentList
+        })
+        mActions.commentMsg(null);
+      }
+      mActions.closeModal({
+        success: '',
+      })
     }
   }, [mState.success])
 
@@ -206,6 +193,7 @@ export default (props) => {
           zoneMsg={zoneMsg}
           likeMsg={likeMsg}
           commentEditor={commentEditor}
+          viewDetail={viewDetail}
         />
       </View>
 
@@ -213,6 +201,7 @@ export default (props) => {
         <CommentPre
           detail={false}
           previewMsg={commentPreview}
+          wrap={wrap}
           commentDelete={commentDelete}
           commentEditor={commentEditor}
           viewDetail={viewDetail}

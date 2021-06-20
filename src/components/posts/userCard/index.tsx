@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import Taro from '@tarojs/taro'
 import {View, Image, Text} from '@tarojs/components'
-import UserNav from '../userNav/index'
+import UserNav from '../../userNav/index'
 import {delPost, UserExp, UserMsg} from '../../../model/api/index'
 import { timeFormat } from '../../../utils'
 

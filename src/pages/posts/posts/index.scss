@@ -1,0 +1,95 @@
+.posts-container{
+  font-size: 28px;
+  color: #333333;
+  background-color: white;
+  .main{
+    min-height: 100vh;
+    .search{
+      background-color: #F3F3F3;
+      width: 710px;
+      height: 70px;
+      border-radius: 35px;
+      margin: 20px;
+      .input{
+        height: 70px;
+        padding: 0 30px;
+      }
+      .input-holder{
+        position: absolute;
+        top: 39px;
+        left: 260px;
+        color: #FFA8C2;
+        font-size: 24px;
+        height: 33px;
+        line-height: 33px;
+        width: 190px;
+        .icon{
+          width: 26.39px;
+          height: 26.33px;
+          vertical-align: middle;
+          margin-right: 20px;
+        }
+      }
+    }
+    .posts{
+      border-top: 10px solid #F3F3F3;
+      .at-tabs__header{
+        height: 86px;
+        .at-tabs__item{
+          height: 40px;
+          padding: 30px 20px 16px;
+          line-height: 40px;
+          .at-tabs__item-underline{
+            width: 42px;
+            height: 6px;
+            left: calc(50% - 21px);
+          }
+        }
+      }
+      .at-tabs__underline{
+        display: none;
+      }
+      .post-tabs{
+        min-height: 750px;
+        .refresh{
+          margin: 20px 0 63px;
+          text-align: center;
+          color: #D5D5D5;
+        }
+      }
+    }
+    .edit-btn{
+      position: fixed;
+      bottom: 50px;
+      right: 20px;
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      .icon{
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  .bottom-more{
+    margin: 20px 0 63px;
+    text-align: center;
+    color: #D5D5D5;
+  }
+  .bottom-pay{
+    margin: 20px 0 59px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    Text{
+      line-height: 40px;
+      &:first-child{
+        color: #999999;
+      }
+      &:last-child{
+        margin-top: 10px;
+        color: #FB89AB;
+      }
+    }
+  }
+}

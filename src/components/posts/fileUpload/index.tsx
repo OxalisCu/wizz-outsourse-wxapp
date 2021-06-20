@@ -6,6 +6,9 @@ import { imgExten, fileExten } from '../../../service/type'
 
 import './index.scss'
 
+// icon
+import deleteBtn from '../../../images/delete.png'
+
 interface ImgItem{
   src: string,
   type: string
@@ -30,6 +33,7 @@ export default (props) => {
   const images: Array<string> = props.images;
   const files: Array<string> = props.files;
   const fileInfo: Array<FileInfo> = props.fileInfo;
+  const deleteFile = props.deleteFile;
 
   const [imgs, setImgs] = useState<Array<ImgItem>>([]);
 
@@ -95,11 +99,19 @@ export default (props) => {
             <View className='file-item' key={item.src}>
               {
                 item.type == 'image' ? (
-                  <Image className='item image' src={item.src} mode='aspectFill' onClick={()=>previewImg(index)}></Image>
+                  <View className='item image'>
+                    <Image className='icon' src={item.src} mode='aspectFill' onClick={()=>previewImg(index)}></Image>
+                    <View className='delete-btn' onClick={(e)=>{deleteFile(index);e.stopPropagation()}}>
+                      <Image className='icon' src={deleteBtn}></Image>
+                    </View>
+                  </View>
                 ) : (        
                   <View className='item file' onClick={()=>{previewFile(item.src)}}>
                     <Text className='type'>{(index - images.length < 0 || index - images.length >= fileInfo.length) ? '' : fileInfo[index - images.length].fileType}</Text>
                     <Text className='name'>{(index - images.length < 0 || index - images.length >= fileInfo.length) ? '' : fileInfo[index - images.length].name}</Text>
+                    <View className='delete-btn' onClick={(e)=>{deleteFile(index);e.stopPropagation()}}>
+                      <Image className='icon' src={deleteBtn}></Image>
+                    </View>
                   </View>
                 )
               }

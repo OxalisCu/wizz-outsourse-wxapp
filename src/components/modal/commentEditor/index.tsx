@@ -16,7 +16,7 @@ export default () => {
   const [nickName, setNickName] = useState();
   const [userAvatar, setUserAvatar] = useState();
 
-  var keyBoardHeight = 0;   // 存储键盘高度信息
+  // var keyBoardHeight = 0;   // 存储键盘高度信息
 
   const [comment, setComment] = useState('');
   const [words, setWords] = useState(0);
@@ -47,11 +47,11 @@ export default () => {
         })
         if(commentRes.data.success){
           Taro.showToast({
-            title: '评论发表成功',
+            title: mState.type + '发表成功',
             icon: 'none'
           })
           mActions.commentMsg({
-            id: mState.id,
+            id: commentRes.data.data.id,     // 新发表的评论的 id
             content: e.detail.value.comment,
             createTime: new Date().getTime(),
             reply: mState.type == '评论' ? null : mState.id,
@@ -81,14 +81,14 @@ export default () => {
     }
   }
 
-  const changeHeight = (e) => {    // 键盘高度改变
-    // console.log(e.detail.height);
-  }   
+  // const changeHeight = (e) => {    // 键盘高度改变
+  //   console.log(e.detail.height);
+  // }   
 
   // 获取键盘高度
-  useEffect(() => {
+  // useEffect(() => {
     
-  }, [])
+  // }, [])
 
   return (
     <View className='comment-editor-container' onClick={(e)=>{e.stopPropagation();}}>
@@ -102,13 +102,13 @@ export default () => {
             showConfirmBar={false}
             maxlength={500}
             autoFocus
-            autoHeight
             fixed
             onInput={getInput}
-            onKeyboardHeightChange={changeHeight} 
+            // onKeyboardHeightChange={changeHeight} 
           />
         <View className='operate-line'>
-          <Image className='left' src={biaoqing}></Image>
+          {/* <Image className='left' src={biaoqing}></Image> */}
+          <View className='left'></View>
           <View className='right'>
             <Text className='words'>
               <Text>{words}</Text>

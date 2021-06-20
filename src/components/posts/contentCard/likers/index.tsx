@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import {View, Image, Text} from '@tarojs/components'
-import UserNav from '../../userNav/index'
+import UserNav from '../../../userNav/index'
 import {LikeMsg} from '../../../../model/api/index'
 
 import './index.scss'

@@ -8,6 +8,7 @@ import './index.scss'
 export default (props) => {
   const detail: boolean = props.detail;
   const previewMsg: Array<CommentItem> = props.previewMsg;
+  const wrap: boolean = props.wrap;
 
   const commentDelete = props.commentDelete;
   const commentEditor = props.commentEditor;
@@ -31,12 +32,13 @@ export default (props) => {
     <View className='preview-container' onClick={viewDetail}>
       {
         previewMsg.map((item, index) => {
-          if(index > 4){   // 多余五条折叠
+          if(detail && index > 5){
             return '';
-          }else if(item.reply == null){    // 是否把评论展示进预览里（是否为首页
+          }
+          if(item.reply == null){    // 是否把评论展示进预览里（是否为首页
             if(!detail){
               return (  
-                <View className='comment-item' onClick={(e)=>{commentEditor(true);e.stopPropagation()}} onLongPress={()=>{commentDelete(item)}}>
+                <View className='comment-item' key={item.id} onClick={(e)=>{commentEditor(item);e.stopPropagation()}} onLongPress={()=>{commentDelete(item)}}>
                   <Text className='name'>{item.userName}：</Text>   
                   <Text className='content'>{item.content}</Text>
                 </View>
@@ -44,7 +46,7 @@ export default (props) => {
             }
           }else{    // 回复信息
             return (  
-              <View className={'reply-item' + (detail ? '' : ' margin')} onClick={(e)=>{commentEditor(true);e.stopPropagation()}} onLongPress={()=>{commentDelete(item)}}>
+              <View className={'reply-item' + (detail ? '' : ' margin')} key={item.id} onClick={(e)=>{commentEditor(item);e.stopPropagation()}} onLongPress={()=>{commentDelete(item)}}>
                 <Text className='name'>{item.userName}</Text>
                 <Text className='between'>回复</Text>
                 <Text className='name'>{map[item.reply]}：</Text>
@@ -55,8 +57,8 @@ export default (props) => {
         })
       }
       {
-        previewMsg.length > 4 && (
-          <View className='more'>查看全部回复</View>
+        wrap && (
+          <View className='more'>{detail ? '查看全部回复' : '查看全部评论'}</View>
         )
       }
     </View>

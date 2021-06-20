@@ -7,7 +7,7 @@ import {
 } from 'taro-ui'
 import { Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { login } from '../../model/api/index'
+import { login, getToken } from '../../model/api/index'
 
 interface UserInfoType {
   nickName: string
@@ -23,17 +23,6 @@ interface DetailType {
 
 interface LoginType {
   detail: DetailType
-}
-
-interface ID{
-  ownId: number,
-  unionId: string
-}
-
-interface IdType{
-  errorCode: number,
-  errorMessage: string,
-  data: ID
 }
 
 export default (props) => {
@@ -64,8 +53,15 @@ export default (props) => {
     Taro.setStorageSync('nickName', UserRes.userInfo.nickName)
     Taro.setStorageSync('avatarUrl', UserRes.userInfo.avatarUrl)
     // id
+    // console.log('id', data);
     if (data.data.errorCode === 0) {
       Taro.setStorageSync('id', data.data.data.ownId)
+
+      // 使用测试 token
+      let token = await getToken({id: data.data.data.ownId});
+      console.log(token);
+      Taro.setStorageSync('token', token.data);
+      
     } else {
       Taro.atMessage({
         message: `失败: ${data.data.errorCode},${data.data.errorMessage}`,
@@ -73,7 +69,7 @@ export default (props) => {
       })
     }
 
-    setIsOpened(false)
+    setIsOpened(false);
     getIsLogin(true);
 
     Taro.atMessage({

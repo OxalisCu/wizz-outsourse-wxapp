@@ -1,0 +1,27 @@
+.navbar-container{
+  position: fixed;
+  z-index: 98;
+  top: 0;
+  left: 0;
+  height: 88px;
+  width: 100%;
+  font-size: 28px;
+  color: white;
+  background-color: #FB89AB;
+  .left{
+    height: 88px;
+    width: 130px;
+    line-height: 40px;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    .icon{
+      width: 14px;
+      height: 24px;
+      margin-right: 20px;
+    }
+    .text{
+
+    }
+  }
+}

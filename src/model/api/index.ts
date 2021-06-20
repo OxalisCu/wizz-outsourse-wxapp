@@ -1,22 +1,42 @@
 import Https from '../../service/index'
 
 /**
- * @description在下面定义接口数据类型
+ * @description登录接口类型
  */
-interface RequestRes<T> {
+interface RequestData<T>{
   data: T
-  code: number
-  message: string,
-  success: boolean
+  errorCode: number
+  errorMessage: string
 }
 
-interface LoginType {
-  id: string
+interface IdType {
+  ownId: number,
+  unionId: string
 }
 
 /**
- * @description首页
+ * @description登录接口
  */
+export const login = (params) => {
+  return Https.login<RequestData<IdType>>(
+    'https://www.blbldata.com/xiaoLogin/grantAuthorization',
+    params,
+    undefined,
+    'POST'
+  )
+}
+
+
+/**
+ * @description测试接口类型
+ */
+interface RequestRes<T>{
+  data: T
+  message: string
+  code: number
+  success: boolean
+}
+
 export interface UserExp{
   id: number,
   type: number,
@@ -103,32 +123,58 @@ interface PostRes{
   id: number
 }
 
-/**
- * @description登录接口
- */
-
-export const login = (params) => {
-  return Https.login<RequestRes<LoginType>>(
-    'https://www.blbldata.com/xiaoLogin/grantAuthorization',
-    params,
-    undefined,
-    'POST'
-  )
+interface CommentRes{
+  id: number
 }
 
-// export const getNewToken = (params) => {
-//   return Https.login<RequestRes<unknown>>(
-//     'https://www.blbldata.com/xiaoLogin/getAuthorityById',
-//     params,
-//     undefined,
-//     'GET'
-//   )
-// }
+export interface MessageItem{
+  id: string
+  emitter: number,
+  emitterName: string,
+  emitterAvatar: string,
+  fromType: number,
+  fromId: number,
+  fromContent: string,
+  toType: number,
+  toId: number | null,
+  toContent: string | null,
+  create_time: number,
+  readed: boolean
+}
+
+interface MessageData{
+  records: Array<MessageItem>,
+  size: number,
+  total: number,
+  pages: number,
+  current: number
+}
+
+export interface RecordMsg{
+  id: number,
+  creator: number | null,
+  createTime: number | null,
+  content: string | null,
+  last_update: number | null,
+  creatorName: string | null,
+  avatar: string | null
+}
+
+interface RecordData{
+  records: Array<RecordMsg>,
+  size: number,
+  total: number,
+  pages: number,
+  current: number
+}
 
 
 /**
  * @description测试接口
  */
+ export const getToken = (params) => {
+   return Https.get<RequestRes<undefined>>('demo/', params);
+ }
 
 export const getUserExp = (params) => {
   return Https.get<RequestRes<UserExp>>('user/' + params.id)
@@ -155,11 +201,11 @@ export const deleteLike = (params) => {
 }
 
 export const postComment = (params) => {
-  return Https.post<RequestRes<Comment>>('comment/', params, 'application/json')
+  return Https.post<RequestRes<CommentRes>>('comment', params, 'application/json')
 }
 
 export const delComment = (params) => {
-  return Https.delete<RequestRes<Comment>>('comment/' + params.id, {}, 'application/json')
+  return Https.delete<RequestRes<CommentRes>>('comment/' + params.id, {}, 'application/json')
 }
 
 export const getFileUrl = (params) => {
@@ -180,6 +226,21 @@ export const delPost = (params) => {
 
 export const editPost = (params) => {
   const {id,...data} = params;
-  console.log(data);
   return Https.put<RequestRes<PostRes>>('post/' + id, data, 'application/json')
+}
+
+export const getMessage = (params) => {
+  return Https.get<RequestRes<MessageData>>('message', params);
+}
+
+export const getMsgNum = () => {
+  return Https.get<RequestRes<number>>('message/count');
+}
+
+export const putMsgRead = (params) => {
+  return Https.put<RequestRes<undefined>>('message/read/' + params.id, {}, 'application/json');
+}
+
+export const getRecords = (params) => {
+  return Https.get<RequestRes<RecordData>>('post/my', params);
 }

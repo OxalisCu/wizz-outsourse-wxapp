@@ -40,7 +40,7 @@ interface StateType {
 interface OpenModal {
   mask: maskType,
   page: pageType,
-  id: number,
+  id?: number,
   name?: string,
   type?: string,
 }
@@ -69,7 +69,7 @@ const model: ModelType<StateType, ActionType> = {
       return {
         mask: data.mask,
         page: data.page,
-        id: data.id,
+        id: data.id || 0,
         name: data.name || '',
         type: data.type || '',
         success: ''

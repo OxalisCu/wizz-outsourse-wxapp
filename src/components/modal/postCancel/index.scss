@@ -1,3 +1,41 @@
 .post-cancel-container{
-  margin: auto;
+  z-index: 100;
+  position: fixed;
+  top: 519px;
+  left: 100px;
+  height: 266px;
+  width: 550px;
+  border-radius: 16px;
+  color: #333333;
+  font-size: 28px;
+  background-color: white;
+  .title{
+    height: 172px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .btns{
+    height: 94px;
+    padding: 4px 60px 30px;
+    display: flex;
+    justify-content: space-between;
+    View{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 60px;
+      width: 190px;
+      border-radius: 11px;
+      &:first-child{
+        border: 2px solid #FB89AB;
+        color: #FB89AB;
+      }
+      &:last-child{
+        background-color: #FB89AB;
+        color: white;
+      }
+    }
+  }
 }

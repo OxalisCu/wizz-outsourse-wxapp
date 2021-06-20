@@ -1,0 +1,44 @@
+.record-container{
+  padding: 30px 20px;
+  font-size: 28px;
+  color: #333333;
+  background-color: white;
+  .record-head{
+    height: 80px;
+    display: flex;
+    align-items: center;
+    .avatar{
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-right: 10px;
+      overflow: hidden;
+      Image{
+        width: 80px;
+        height: 80px;
+      }
+    }
+    .username{
+      margin-right: 10px;
+    }
+  } 
+  .record-detail{
+    margin-left: 90px;
+    .content{
+      margin: 20px 0;
+      background-color: #F9F9F9;
+      padding: 20px;
+      View{
+        overflow: hidden;
+        line-height: 45px;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+      }
+    }
+    .time{
+      font-size: 24px;
+      color: #999999;
+    }
+  }
+}

@@ -12,10 +12,9 @@ export default (props) => {
   const [userMsg, setUserMsg] = useState<UserMsg>();
   const [previewMsg, setPreviewMsg] = useState<Array<CommentItem>>(props.previewMsg);
   const commentDelete = props.commentDelete;
-  const commentEditor = props.commentEditor;
   
-  const [del, setDel] = useState<boolean>(false);
   const [userExp, setUserExp] = useState<UserExp>();
+  const [wrap, setWrap] = useState<boolean>();
 
   const [mState, mActions] = useStore('Modal');
 
@@ -38,7 +37,16 @@ export default (props) => {
         userType: previewMsg[0].userType
       })
     }
+    // console.log('previewMsg',previewMsg);
   }, [])
+
+  useEffect(()=>{
+    if(previewMsg.length > 5){
+      setWrap(true);
+    }else{
+      setWrap(false);
+    }
+  }, [previewMsg])
 
   // 管理员、帖子发布者、评论发表者可删除评论
   const replyDelete = (item) => {   // 删除评论或回复
@@ -46,47 +54,42 @@ export default (props) => {
       mActions.openModal({
         mask: 'commentDelete',
         page: 'postDetail',
-        id: item.id ? item.id : previewMsg[0].id,
+        id: item.id,
       })
-      setDel(true);
     }
   }
 
-  const replyEditor = () => {    // 评论
+  const replyEditor = (item) => {    // 回复
     mActions.openModal({
       mask: 'commentEditor',
       page: 'postDetail',
-      id: previewMsg[0].id,
-      name: previewMsg[0].userName,
+      id: item.id,
+      name: item.userName,
       type: '回复',
     })
-    
   }
 
   useEffect(()=>{
-    if(mState.success == 'commentDelete' && del){
-      console.log('commentDelete');
-      let num = 5;
-      let preview = [];
-      // 删除评论
-      if(mState.id == previewMsg[0].id){
-        // 把 previewMsg 全删掉
-      }else{    // 删除回复
-        previewMsg.map((item, index) => {
-          if(item.id != mState.id){
-            preview.push(item);
-            num --;
-          }
-          if(num < 0) return;
-        })
-      }
-     
-      setPreviewMsg(preview);
-      setDel(true);
-      mActions.closeModal({
-        success: ''
+    let preview = [];
+    if(mState.success == 'commentDelete'){
+      // 删除回复
+      previewMsg.map((item, index) => {
+        if(item.id != mState.id){
+          preview.push(item);
+        }
       })
+      setPreviewMsg(preview);
+    }else if(mState.success == 'commentEditor'){
+      // 回复评论，放在最末尾
+      [...preview] = previewMsg;
+      preview.push(mState.comment);
+      mActions.commentMsg(null);
+      setPreviewMsg(preview);
+      // console.log('replyPreview',preview);
     }
+    mActions.closeModal({
+      success: ''
+    })
   }, [mState.success])
 
   const viewDetail = () => {
@@ -108,14 +111,15 @@ export default (props) => {
         userMsg={userMsg}
       />
   
-      <View className='main-content' onClick={()=>{commentEditor(previewMsg[0])}} onLongPress={()=>{commentDelete(previewMsg[0])}}>
-        {previewMsg[0].content}
+      <View className='main-content' onClick={()=>{replyEditor(previewMsg[0])}} onLongPress={()=>{commentDelete(previewMsg[0])}}>
+        <Text>{previewMsg[0].content}</Text>
       </View>
 
       {/* 评论或回复预览 */}
       <CommentPre
         detail
         previewMsg={previewMsg}
+        wrap={wrap}
         commentDelete={replyDelete}
         commentEditor={replyEditor}
         viewDetail={viewDetail}

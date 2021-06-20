@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {View} from '@tarojs/components'
 import CommentEditor from './commentEditor/index'
 import CommentDelete from './commentDelete/index'
