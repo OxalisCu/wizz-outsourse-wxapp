@@ -59,11 +59,14 @@ export default () => {
   // 允许上传
   const [upload, setUpload] = useState<boolean>(false);
 
+  const msgType = ['创建帖子中...', '部分文件上传错误', '帖子创建成功', '帖子修改成功'];
+
   const [sendAvailable, setSendAvailable] = useState(false);
   const [lineCount, setLineCount] = useState(1);
   const [safeArea, setSafeArea] = useState<SafeArea>();
 
   const [mState, mActions] = useStore('Modal');
+  const [rState, rActions] = useStore('Refresh');
  
   // 加载分区信息
   useEffect(() => {
@@ -145,10 +148,7 @@ export default () => {
   }
 
   const getOssUrl = async () => {
-    Taro.showToast({
-      title: '文件上传中',
-      icon: 'loading'
-    })
+    loading(0);
 
     if(images.length == 0 && files.length == 0){
       // console.log('ddeomo');
@@ -176,10 +176,7 @@ export default () => {
         if(url.data.success){
           url1.push(url.data.data.url);
         }else{
-          Taro.showToast({
-            title: '获取图片 url 失败',
-            icon: 'none'
-          })
+          loading(1);
           setUpload(false);
           return;
         }
@@ -245,10 +242,6 @@ export default () => {
                 // console.log('uploadRes',uploadRes);
                 if(uploadRes.statusCode != 200){
                   failNums++;
-                  Taro.showToast({
-                    title: failNums + '份文件上传失败',
-                    icon: 'none'
-                  })
                 }
               })
             )
@@ -260,10 +253,6 @@ export default () => {
                 let uploadRes = await putFileOss(url.file[index], tempFileRes, fileType[getFileInfo(item)[1]]);
                 if(uploadRes.statusCode != 200){
                   failNums++;
-                  Taro.showToast({
-                    title: failNums + '份文件上传失败',
-                    icon: 'none'
-                  })
                 }
               })
             )
@@ -275,14 +264,10 @@ export default () => {
               return getUrl(item);
             })
           }
-          Taro.showToast({
-            title: '帖子创建中',
-            icon: 'loading'
-          })
+
           let createRes;
           if(id == null){
             createRes = await createPost({
-              title: 'dd',
               pictures: imageUrl,
               files: fileUrl,
               zone: zoneChoice,
@@ -296,20 +281,17 @@ export default () => {
               content: postCon
             });
           }
-          // console.log(createRes);
-          Taro.hideToast();
+
           if(createRes.data.success){
-            Taro.showToast({
-              title: id == null ? '帖子创建成功' : '帖子修改成功',
-              icon: 'none',
-              success(){
-                setTimeout(()=>{
-                  Taro.navigateBack({
-                    delta: 1
-                  })
-                }, 100)
+            if(id == null){
+              if(failNums == 0){
+                loading(2);
+              }else{
+                loading(1);
               }
-            })
+            }else{
+              loading(3);
+            }
           }else{
             Taro.showToast({
               title: createRes.data.message,
@@ -321,6 +303,33 @@ export default () => {
       }
     )()
   }, [upload])
+
+  const loading = (type: number) => {
+    console.log(type);
+    if(type == 0){
+      Taro.hideToast();
+      Taro.showToast({
+        title: '帖子创建中...',
+        icon: 'loading'
+      })
+    }else{
+      Taro.hideToast();
+      Taro.showToast({
+        title: msgType[type],
+        icon: 'none'
+      })
+      if(type == 3 || type == 2){
+        setTimeout(()=>{
+          Taro.navigateBack({
+            delta: 1,
+            success(res){
+              rActions.refresh(true);
+            }
+          })
+        }, 100)
+      }
+    } 
+  }
 
   const chooseImg = () => {
     if(images.length == 9){
@@ -478,7 +487,7 @@ export default () => {
               {
                 zones.length != 0 && zones.map((item, index) => {
                   return index >= 2 && (
-                    <View className={'tag-item' + (zoneChoice == index ? ' choose' : '')} key={index} onClick={()=>{if(id == null)setZoneChoice(index)}}>{item.title}</View>
+                    <View className={'tag-item' + (zoneChoice == index ? ' choose' : '')} key={index} onClick={()=>{setZoneChoice(index)}}>{item.title}</View>
                   )
                 })
               }
@@ -487,7 +496,7 @@ export default () => {
         </View>
       </View>
 
-      <View className={sendAvailable ? 'send-btn active' : 'send-btn'} onClick={getOssUrl}>发送</View>
+      <View className={sendAvailable ? 'send-btn active' : 'send-btn'} onClick={()=>{if(sendAvailable)getOssUrl()}}>发送</View>
 
       <Modal page='postEditor' />
     </View>

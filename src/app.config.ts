@@ -8,6 +8,7 @@ export default {
     'pages/user/user/index',
     'pages/user/msgs/index',
     'pages/user/records/index',
+    'pages/demo/index'
   ],
   window: {
     backgroundTextStyle: 'light',

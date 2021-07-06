@@ -19,7 +19,7 @@ interface IdType {
  */
 export const login = (params) => {
   return Https.login<RequestData<IdType>>(
-    'https://www.blbldata.com/xiaoLogin/grantAuthorization',
+    'https://www.blbldata.com/xiaoLogin/grantAuthorization/',
     params,
     undefined,
     'POST'
@@ -40,7 +40,7 @@ interface RequestRes<T>{
 export interface UserExp{
   id: number,
   type: number,
-  expireTIme: number,
+  expireTime: number,
   exp: number | null,
   _last_Update: number
 }
@@ -172,15 +172,15 @@ interface RecordData{
 /**
  * @description测试接口
  */
- export const getToken = (params) => {
-   return Https.get<RequestRes<undefined>>('demo/', params);
- }
+export const getToken = (params) => {
+  return Https.get<RequestRes<undefined>>('demo/', params);
+}
 
 export const getUserExp = (params) => {
   return Https.get<RequestRes<UserExp>>('user/' + params.id)
 }
 
-export const getZones = () => {
+export const getZones = () => { 
   return Https.get<RequestRes<Array<ZoneItem>>>('post/zone')
 }
 

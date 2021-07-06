@@ -36,5 +36,5 @@ export const isUpload = function (str: string): boolean{
 // 时间转换
 export const timeFormat = function (time: number): string{
   const date = new Date(time);
-  return date.getFullYear() + '.' + (date.getMonth()+1) + '.' + (date.getDate()) + ' ' + date.getHours() + ':' + date.getMinutes();
+  return date.getFullYear() + '.' + (date.getMonth()+1) + '.' + (date.getDate()) + ' ' + date.getHours() + ':' + (date.getMinutes()<10 ? '0' : '') + date.getMinutes();
 }

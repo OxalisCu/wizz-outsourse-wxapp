@@ -1,4 +1,5 @@
 import { Model } from 'react-model'
+import { delComment } from '../api'
 
 // 显示模态框和蒙层（显示的页面和模态框信息）
 
@@ -15,7 +16,6 @@ type pageType =
     | 'postDetail'
     | 'commentDetail'
 
-
 interface CommentItem{
   id: number,
   content: string,
@@ -27,40 +27,46 @@ interface CommentItem{
   userType: number
 }
 
-interface StateType {
-  mask: maskType
-  page: pageType
-  id: number,
-  name?: string,
-  type?: string
-  success: maskType,
-  comment: CommentItem
+interface AddComment{
+  postId?: number,     // 对应帖子的 id
+  toId?: number,   // 被评论者或被删除者 id
+  name?: string,   // 被评论者昵称
+  type?: number,   // 评论或回复（1或0）
+  comment?: CommentItem | null
+}
+
+interface DelComment{
+  postId?: number,
+  toId?: number,
 }
 
 interface OpenModal {
   mask: maskType,
   page: pageType,
-  id?: number,
-  name?: string,
-  type?: string,
 }
 
 interface CloseModal{
   success: maskType
 }
 
+interface StateType extends OpenModal, CloseModal{
+  delComment: DelComment | null,
+  addComment: AddComment | null
+}
+
 interface ActionType {
   openModal: OpenModal,
   closeModal: CloseModal,
-  commentMsg: CommentItem,
+  addComment: AddComment,
+  delComment: DelComment
 }
 
 const initialState: StateType = {
   mask: '',
   page: '',
-  id: -1,
   success: '',
-  comment: null
+  addComment: null,
+  delComment: null
 }
 
 const model: ModelType<StateType, ActionType> = {
@@ -69,9 +75,6 @@ const model: ModelType<StateType, ActionType> = {
       return {
         mask: data.mask,
         page: data.page,
-        id: data.id || 0,
-        name: data.name || '',
-        type: data.type || '',
         success: ''
       }
     },
@@ -82,9 +85,14 @@ const model: ModelType<StateType, ActionType> = {
         success: data.success,
       }
     },
-    async commentMsg(data){
+    async addComment(data){
       return {
-        comment: data
+        addComment: data
+      }
+    },
+    async delComment(data){
+      return {
+        delComment: data
       }
     }
   },

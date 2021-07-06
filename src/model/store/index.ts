@@ -1,7 +1,9 @@
 import { Model } from 'react-model'
 import Modal from './modal'
+import Wrap from './wrap'
+import Refresh from './refresh'
 
-const models = { Modal }
+const models = { Modal, Wrap, Refresh }
 
 export const {
   getInitialState,

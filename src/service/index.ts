@@ -20,7 +20,7 @@ const baseOptions = function <T>(params, method = 'GET' as Method) {
   contentType = params.contentType || contentType
   const option = {
     url: base + url,
-    data: method === 'GET' || method === 'POST' && contentType === 'application/x-www-form-urlencoded' ? data : JSON.stringify(data),
+    data: data,
     method: method,
     header: {
       'content-type': contentType,
@@ -72,12 +72,6 @@ const loginOptions = function<T>(params, method){
       if (res.header.authorization) {
         try {
           Taro.setStorageSync('token', res.header.authorization)
-        } catch (error) {
-          console.log(error);
-        }
-      }else if(res.header.Authorization){
-        try {
-          Taro.setStorageSync('token', res.header.Authorization)
         } catch (error) {
           console.log(error);
         }

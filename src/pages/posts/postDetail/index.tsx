@@ -1,179 +1,229 @@
 import React, { useEffect, useState } from 'react'
-import Taro, { useRouter } from '@tarojs/taro'
+import Taro, { useRouter, useDidShow } from '@tarojs/taro'
 import {View} from '@tarojs/components'
 import UserCard from '../../../components/posts/userCard'
 import ContentCard from '../../../components/posts/contentCard'
 import CommentCard from '../../../components/posts/commentCard'
 import CommentBar from '../../../components/posts/commentBar'
 import Modal from '../../../components/modal/index'
-import {getPostDetail, PostMsg, UserInfo, UserMsg, ContentMsg, ZoneMsg, LikeMsg, CommentMsg, CommentItem, UserExp} from '../../../model/api/index'
+import {getPostDetail, PostMsg, CommentItem, UserExp, delPost} from '../../../model/api/index'
 import {useStore} from '../../../model/store/index'
 
 import './index.scss'
 
 export default () => {
   const id = useRouter().params.id;
-
   const [postData, setPostData] = useState<PostMsg>();
-
-  const [userInfo, setUserInfo] = useState<UserInfo>();
-  const [userMsg, setUserMsg] = useState<UserMsg>();
-  const [contentMsg, setContentMsg] = useState<ContentMsg>();
-  const [zoneMsg, setZoneMsg] = useState<ZoneMsg>();
-  const [likeMsg, setLikeMsg] = useState<LikeMsg>();
-  const [commentMsg, setCommentMsg] = useState<CommentMsg>();
+  const [commentMsg, setCommentMsg] = useState<Array<Array<CommentItem>>>([]);
 
   const [userExp, setUserExp] = useState<UserExp>();
-  const [del, setDel] = useState<boolean>(false);
+  const [isPay, setIsPay] = useState<boolean>();   
 
   const [mState, mActions] = useStore('Modal');
+  const [rState, rActions] = useStore('Refresh');
 
   useEffect(() => {
     try{
       let exp = Taro.getStorageSync('userExp');
       if(exp){
         setUserExp(exp);
-        // console.log(exp,name);
+        setIsPay(exp.type > 0 && exp.expireTime > new Date().getTime());
       }
     }catch(err){console.log(err)}
   }, [])
 
-  useEffect(() => {
-    ;(
-      async () => {
-        var postRes = await getPostDetail({
-          id: id
-        })
-        if(postRes.data.success){
-          setPostData(postRes.data.data);
-          // console.log('postDetail', postRes.data.data);
-        }else{
-          Taro.showToast({
-            title: postRes.data.message,
-            icon: 'none'
-          })
-        }
-      }
-    )()
-  }, [])
-
-  useEffect(() => {
-    if(postData != null){
-      setUserInfo({
-        id: postData.creator,
-        name: postData.creatorName
+  useDidShow(async () => {
+    let postRes = await getPostDetail({
+      id: id
+    })
+    if(postRes.data.success){
+      setPostData(postRes.data.data);
+      setCommentMsg(postRes.data.data.comments);
+    }else{
+      Taro.showToast({
+        title: postRes.data.message,
+        icon: 'none'
       })
-      setUserMsg({
-        creator: postData.creator,
-        creatorName: postData.creatorName,
-        createTime: postData.createTime,
-        avatar: postData.avatar,
-        userType: postData.userType
-      })
-      setContentMsg({
-        id: postData.id,
-        title: postData.title,
-        content: postData.content,
-        pictures: postData.pictures,
-        files: postData.files,
-        last_update: postData.last_update,
-        pin: postData.pin
-      })
-      setZoneMsg({
-        zone: postData.zone,
-        awesome: postData.awesome
-      })
-      setLikeMsg({
-        likeCount: postData.likeCount,
-        isLiked: postData.isLiked,
-        likers: postData.likers,
-      })
-      setCommentMsg({
-        commentCount: postData.commentCount,
-        comments: postData.comments
-      })
-    }
-  }, [postData])
-
-  const commentDelete = (item: CommentItem) => {
-    if(userExp.type == 6 || userExp.id == userMsg.creator || userExp.id == item.user){
-      mActions.openModal({
-        mask: 'commentDelete',
-        page: 'postDetail',
-        id: item.id,
-      })
-      setDel(true);
     }
   }
+  )
 
-  const commentEditor = () => {
+  // 付费用户评论
+  const commentEditor = (toId: number | null, toName: string | null) => {
+    if(!isPay){
+      Taro.showToast({
+        title: '免费用户不能评论',
+        icon: 'none'
+      })
+      return;
+    }
     mActions.openModal({
       mask: 'commentEditor',
       page: 'postDetail',
-      id: contentMsg.id,
-      name: userMsg.creatorName,
-      type: '评论'
     })
-    setDel(true);
+    mActions.addComment({
+      toId,
+      postId: postData.id,
+      name: toId == null ? postData.creatorName : toName,
+      type: toId == null ? 1 : 0,
+      comment: null
+    })
   }
 
-  useEffect(()=>{
-    if(mState.success == 'commentDelete' &&  del){
-      let commentList: Array<Array<CommentItem>> = [];
-      commentMsg.comments.map((comment, i1) => {
-        if(comment[0].id != mState.id){
-          commentList.push(comment);
-        }
+  // 管理员、帖子创建者、评论发表者删除评论
+  const commentDelete = (toId: number) => {
+    if(userExp.type == 6 || userExp.id == postData.creator || userExp.id == postData.creator){
+      mActions.openModal({
+        mask: 'commentDelete',
+        page: 'postDetail',
       })
-      setCommentMsg({
-        commentCount: commentMsg.commentCount-1,
-        comments: commentList
+      mActions.delComment({
+        postId: postData.id,
+        toId,
       })
-    }else if(mState.success == 'commentEditor' && del && mState.id == contentMsg.id){    // 评论，放在最上面
-      let [...commentList] = commentMsg.comments;
-      commentList.unshift([mState.comment]);
-      let commentTemp = {
-        commentCount: commentMsg.commentCount+1,
-        comments: commentList
-      };
-      setCommentMsg(commentTemp);
-      // console.log(commentList);
-      mActions.commentMsg(null);
     }
-    setDel(false);
-    mActions.closeModal({
-      success: ''
-    })
+  }
+
+  // 删除或添加评论
+  useEffect(()=>{
+    let commentList = [];
+    if(mState.success == 'commentDelete' && mState.delComment.postId == postData.id){
+      commentMsg.map((com, i1) => {   // 删除评论
+        if(com[0].id == mState.delComment.toId){   
+          return;
+        }
+        let temp = [];
+        com.map((item, i2) => { 
+          if(item.id != mState.delComment.toId){   // 删除回复
+            temp.push(item);
+          }
+        })
+        commentList.push(temp);
+      })
+      setCommentMsg(commentList);
+      mActions.closeModal({
+        success: ''
+      })
+    }else if(mState.success == 'commentEditor' && mState.addComment.postId == postData.id){
+      if(mState.addComment.comment.reply == null){   // 评论，新发表放在最上面
+        commentList = [...commentMsg];
+        commentList.unshift([mState.addComment.comment]);  
+        setCommentMsg(commentList);
+      }else{    // 回复，新发表放在最后
+        commentMsg.map((comment, i1) => {
+          let temp = [];
+          let hasReply = false;
+          for(let item of comment){
+            if(item.id == mState.addComment.comment.reply){
+              hasReply = true;
+              break;
+            }
+          }
+          if(hasReply){
+            temp = [...comment, mState.addComment.comment];
+          }else{
+            temp = [...comment];
+          }
+          commentList.push(temp);
+        })
+        setCommentMsg(commentList);
+      }
+      mActions.closeModal({
+        success: '',
+      })
+    }
   }, [mState.success])
 
-  return postData != null && userInfo != null && userMsg != null && contentMsg != null &&zoneMsg != null && likeMsg != null && commentMsg != null
-    && (
+  // 编辑帖子，已经过权限判断
+  const editPost = () => { 
+    Taro.navigateTo({
+      url: '../postEditor/index?id=' + postData.id
+    })
+  }
+
+  // 删除帖子，已经过权限判断
+  const deletePost = async () => {  
+    const delRes = await delPost({
+      id: postData.id
+    })
+    if(delRes.data.success){
+      Taro.showToast({
+        title: '帖子删除成功',
+        icon: 'none',
+        success(res){
+          Taro.navigateBack({
+            delta: 1,
+            success(res){
+              rActions.refresh(true);
+            }
+          })
+        }
+      })
+    }else{
+      Taro.showToast({
+        title: delRes.data.message,
+        icon: 'none'
+      })
+    }
+  } 
+
+  return postData != null && (
     <View className='post-detail-container'>
       <View className='up'>
         <UserCard 
-          userMsg={userMsg}
-          editable
-          postId={contentMsg.id}
+          userMsg={{
+            creator: postData.creator,
+            creatorName: postData.creatorName,
+            createTime: postData.createTime,
+            avatar: postData.avatar,
+            userType: postData.userType
+          }}
+          editPost={editPost}
+          deletePost={deletePost}
         />
         
         <ContentCard
           detail
-          userMsg={userMsg}
-          contentMsg={contentMsg}
-          zoneMsg={zoneMsg}
-          likeMsg={likeMsg}
+          userMsg={{
+            creator: postData.creator,
+            creatorName: postData.creatorName,
+            createTime: postData.createTime,
+            avatar: postData.avatar,
+            userType: postData.userType
+          }}
+          contentMsg={{
+            id: postData.id,
+            title: postData.title,
+            content: postData.content,
+            pictures: postData.pictures,
+            files: postData.files,
+            last_update: postData.last_update,
+            pin: postData.pin
+          }}
+          zoneMsg={{
+            zone: postData.zone,
+            awesome: postData.awesome
+          }}
+          likeMsg={{
+            likeCount: postData.likeCount,
+            isLiked: postData.isLiked,
+            likers: postData.likers,
+          }}
         />
       </View>
     
       <View className='bottom'>
-        <View className='comment-num'>评论（{commentMsg.commentCount}）</View>
+        <View className='comment-num'>评论（{postData.comments.length}）</View>
         {
-          commentMsg.comments.length != 0 && (
-            commentMsg.comments.map((item, index) => {
+          commentMsg.length != 0 && (
+            commentMsg.map((item, index) => {
               return (
                 <View className='comment-list' key={item[0].id}>
                   <CommentCard
-                    previewMsg={item}
+                    commentItem={item}
+                    postId={postData.id}
+                    postCreator={postData.creator}
+                    commentEditor={commentEditor}
                     commentDelete={commentDelete}
                   />
                 </View>
@@ -183,7 +233,9 @@ export default () => {
         }
       </View>
 
-      <CommentBar commentEditor={commentEditor} />
+      <View onClick={()=>{commentEditor(null, null);console.log('demo')}}>
+        <CommentBar />
+      </View>
 
       <Modal page='postDetail' />
     </View>

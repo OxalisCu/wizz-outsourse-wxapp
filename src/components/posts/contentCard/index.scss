@@ -45,15 +45,29 @@
       display: flex;
       align-items: center;
       justify-content: space-evenly;
-      padding: 0 40px 0 20px;
+      padding: 0 20px 0 20px;
       .like{
-        width: 35.59px;
-        height: 34.76px;
+        width: 60px;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .icon{  
+          width: 35.59px;
+          height: 34.76px;
+        }
       }
       .comment{
-        width: 31.25px;
-        height: 30.21px;
-        margin-right: 70px;
+        width: 60px;
+        height: 100%;
+        margin-right: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .icon{
+          width: 31.25px;
+          height: 30.21px;
+        }
       }
     }
   }

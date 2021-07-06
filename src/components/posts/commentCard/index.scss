@@ -8,4 +8,36 @@
     line-height: 45px;
     word-break: break-all;
   }
+  .reply-container{
+    font-size: 28px;
+    margin-left: 90px;
+    padding: 30px 11px 30px 30px;
+    background-color: #F9F9F9;
+    .reply-item{
+      line-height: 45px;
+      word-break: break-all;
+      margin-bottom: 15px;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+      .name{
+        color: #729BBB;
+      }
+      .content{
+        color: #666666;
+      }
+      .between{
+        color: #999999;
+        margin: 0 10px;
+      }
+    }
+    .more{
+      display: inline-block;
+      color: #FB89AB;
+    }
+    .more:active{
+      background-color: whitesmoke;
+    }
+  }
 }

@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react'
-import Taro from '@tarojs/taro'
+import React, {useState, useEffect } from 'react'
+import Taro, {useRouter} from '@tarojs/taro'
 import {View, Text} from '@tarojs/components'
 import UserCard from '../../../components/posts/userCard/index'
 import CommentBar from '../../../components/posts/commentBar/index'
@@ -10,8 +10,10 @@ import {useStore} from '../../../model/store/index'
 import './index.scss'
 
 export default () => {
-  const [commentDetail, setCommentDetail] = useState<Array<CommentItem>>([]);
+  const postId: number = parseInt(useRouter().params.id);
+  const postCreator: number = parseInt(useRouter().params.creator);
 
+  const [commentDetail, setCommentDetail] = useState<Array<CommentItem>>([]);
   const [map, setMap] = useState<Array<string>>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,31 +44,39 @@ export default () => {
     }
   }, [commentDetail])
 
-  const commentEditor = (item: CommentItem) => {
+  const commentEditor = (toId: number | null, toName: string | null) => {
     mActions.openModal({
       page: 'commentDetail',
       mask: 'commentEditor',
-      id: item.id,
-      name: item.userName,
-      type: '回复'
+    })
+    mActions.addComment({
+      toId,
+      postId: postId,
+      name: toName,
+      type: 0,
+      comment: null
     })
   }
 
-  const commentDelete = (item: CommentItem) => {
-    if(userExp.type == 6 || userExp.id == item.user || userExp.id == commentDetail[0].user){
+  // 管理员、帖子创建者、评论发表者删除评论
+  const commentDelete = (toId: number, userId: number) => {
+    if(userExp.type == 6 || userExp.id == postCreator || userExp.id == userId){
       mActions.openModal({
         mask: 'commentDelete',
         page: 'commentDetail',
-        id: item.id,
+      })
+      mActions.delComment({
+        toId,
+        postId: postId,
       })
     }
   }
 
   useEffect(() => {
     let commentList = [];
-    if(mState.success == 'commentDelete'){
-      commentDetail.map((item) => {
-        if(item.id != mState.id){
+    if(mState.success == 'commentDelete' && mState.delComment.postId == postId){
+      commentDetail.map((item) => {   // 删除回复
+        if(item.id != mState.delComment.toId){
           commentList.push(item);
         }
       })
@@ -74,14 +84,12 @@ export default () => {
       mActions.closeModal({
         success: ''
       })
-    }else if(mState.success == 'commentEditor'){
-      [...commentList] = commentDetail;
-      commentList.push(mState.comment);
+    }else if(mState.success == 'commentEditor' && mState.addComment.postId == postId){
+      commentList = [...commentDetail, mState.addComment.comment];
       setCommentDetail(commentList);
       mActions.closeModal({
         success: ''
       })
-      mActions.commentMsg(null);
     }
   }, [mState.success])
 
@@ -98,7 +106,7 @@ export default () => {
           }}
         />
         <View className='main-content' 
-          onClick={()=>{commentEditor(commentDetail[0])}}
+          onClick={()=>{commentEditor(commentDetail[0].id, commentDetail[0].userName)}}
         >
           <Text>{commentDetail[0].content}</Text>
         </View>
@@ -109,7 +117,7 @@ export default () => {
           commentDetail.map((item, index) => {
             if(index == 0){return ''}
             return (
-              <View className='reply-item' key={index}>
+              <View className='reply-item' key={item.id}>
                 <UserCard
                   userMsg={{
                     creator: commentDetail[index].user,
@@ -120,8 +128,8 @@ export default () => {
                   }}
                 />
                 <View className='reply-content' 
-                  onClick={()=>{commentEditor(item)}} 
-                  onLongPress={()=>{commentDelete(item)}}
+                  onClick={()=>{commentEditor(item.id, item.userName)}} 
+                  onLongPress={()=>{commentDelete(item.id, item.user)}}
                 >
                   {
                     (item.reply == commentDetail[0].id) ? ('') :(
@@ -139,7 +147,9 @@ export default () => {
         }
       </View>
 
-      <CommentBar commentEditor={()=>{commentEditor(commentDetail[0])}} />
+      <View onClick={()=>{commentEditor(commentDetail[0].id, commentDetail[0].userName)}}>
+        <CommentBar />
+      </View>
 
       <Modal page='commentDetail' />
     </View>

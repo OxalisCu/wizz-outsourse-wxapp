@@ -30,36 +30,43 @@ export default (props) => {
   const [isOpened, setIsOpened] = useState(false)
 
   const getUserProfile = async (e: LoginType) => {
-    // 微信登录，获取登录凭证
-    const UserRes = await Taro.getUserProfile({
+    // 微信登录，获取头像昵称
+    const userProfileRes = await Taro.getUserProfile({
       desc: '获取登录信息',
       lang: 'zh_CN'
     })
+    Taro.setStorageSync('nickName', userProfileRes.userInfo.nickName)
+    Taro.setStorageSync('avatarUrl', userProfileRes.userInfo.avatarUrl)
+
+    // 获取 iv 等
+    const userRes = await Taro.getUserInfo();
+    // console.log('userRes', userRes);
     // 用户未授权
-    if (!UserRes.iv) {
+    if (!userRes.iv) {
       Taro.atMessage({
-        message: `失败: ${UserRes.errMsg}`,
+        message: `失败: ${userRes.errMsg}`,
         type: 'error'
       })
-      return
+      return;
     }
     
     // 自定义登录
     const data = await login({
       code: Taro.getStorageSync('code'),
-      iv: UserRes.iv,
-      encryptedData: UserRes.encryptedData
+      // iv: userRes.iv,
+      // encryptedData: userRes.encryptedData
+      iv: userProfileRes.iv,
+      encryptedData: userProfileRes.encryptedData
     })
-    Taro.setStorageSync('nickName', UserRes.userInfo.nickName)
-    Taro.setStorageSync('avatarUrl', UserRes.userInfo.avatarUrl)
     // id
-    // console.log('id', data);
+    console.log('id', data);
     if (data.data.errorCode === 0) {
       Taro.setStorageSync('id', data.data.data.ownId)
+      // Taro.setStorageSync('token', data.header.authorization)
 
       // 使用测试 token
       let token = await getToken({id: data.data.data.ownId});
-      console.log(token);
+      // console.log(token);
       Taro.setStorageSync('token', token.data);
       
     } else {

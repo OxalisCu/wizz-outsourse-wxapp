@@ -32,7 +32,7 @@
       }
     }
     .posts{
-      border-top: 10px solid #F3F3F3;
+      // border-top: 10px solid #F3F3F3;
       .at-tabs__header{
         height: 86px;
         .at-tabs__item{
@@ -49,13 +49,34 @@
       .at-tabs__underline{
         display: none;
       }
-      .post-tabs{
-        min-height: 750px;
-        .refresh{
-          margin: 20px 0 63px;
-          text-align: center;
-          color: #D5D5D5;
+      .at-tabs__body{
+        .post-tabs{
+          .refresh{
+            margin: 20px 0 63px;
+            text-align: center;
+            color: #D5D5D5;
+          }
+          .post-item{
+            .post-divider{
+              background-color: #999999;
+              opacity: 0.2;
+              height: 1px;
+              width: 710px;
+              margin: 0 20px;
+            }
+            &:last-child .post-divider{
+              display: none;
+            }
+          }
         }
+      }
+    }
+    .sticky{
+      .at-tabs__header{
+        z-index: 99;
+        position: fixed;
+        top: 0;
+        box-shadow: 0 2px 5px 5px #F3F3F3;
       }
     }
     .edit-btn{

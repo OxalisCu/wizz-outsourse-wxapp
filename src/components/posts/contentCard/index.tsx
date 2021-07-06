@@ -35,6 +35,7 @@ export default (props) => {
 
   const [userExp, setUserExp] = useState<UserExp>();
   const [nickName, setNickName] = useState<string>();
+  const [isPay, setIsPay] = useState<boolean>();
 
   const [mState, mActions] = useStore('Modal');
 
@@ -43,6 +44,7 @@ export default (props) => {
       let zone = Taro.getStorageSync('zones');
       if(zone){
         setZones(zone);
+        // console.log(zone);
       }
     }catch(err){console.log(err)}
   }, [])
@@ -54,7 +56,7 @@ export default (props) => {
       if(exp && name){
         setUserExp(exp);
         setNickName(name);
-        // console.log(exp,name);
+        setIsPay(exp.type > 0 && exp.expireTime > new Date().getTime())
       }
     }catch(err){console.log(err)}
   }, [])
@@ -76,7 +78,7 @@ export default (props) => {
   const like = () => {    // 点赞
     ;(
       async () => {
-        if(userExp.type == 0){
+        if(!isPay){
           Taro.showToast({
             title: '免费用户不能点赞',
             icon: 'none'
@@ -134,11 +136,10 @@ export default (props) => {
 
   return (
     <View className='content-container'>
-
       <View className={'content-text' + (detail ? ' content-text-detail' : '')} onClick={viewDetail}>
         <Texts
           detail={detail}
-          content={contentMsg.content} 
+          content={contentMsg.content}
           id={contentMsg.id}
         />
       </View>
@@ -152,7 +153,6 @@ export default (props) => {
       </View>
 
       <View className='component'>
-
         <View className='zones'>
           {
             zoneMsg.awesome && (
@@ -163,18 +163,21 @@ export default (props) => {
             )
           }
           {
-            zones.length == 16 && zoneMsg.zone > 0 && <View className='zone-item'>
+            zones.length != 0 && zoneMsg.zone > 0 && <View className='zone-item'>
             <Text>#</Text>
             <Text>{zones[zoneMsg.zone].title}</Text>
           </View>
           }
         </View>
-
         {
           !detail && (
             <View className='operate'>
-              <Image className='comment' src={pinglun} onClick={()=>{commentEditor(null)}}></Image>
-              <Image className='like' src={likeMsg.isLiked ? zan_active : zan} onClick={like}></Image>
+              <View className='comment'>
+                <Image className='icon' src={pinglun} onClick={()=>{commentEditor(null, null)}}></Image>
+              </View>
+              <View className='like'>
+                <Image className='icon' src={likeMsg.isLiked ? zan_active : zan} onClick={like}></Image>
+              </View>
             </View>
           )
         }
@@ -185,13 +188,11 @@ export default (props) => {
           <View className='last-edit'>最后编辑时间：{contentMsg.last_update == null ? timeFormat(userMsg.createTime) : timeFormat(contentMsg.last_update)}</View>
         )
       }
-
       <View className='likes'>
         <Likers
           likeMsg={likeMsg}
         />
       </View>
-
       {
         detail && (
           <View className='like-bottom' onClick={like}>

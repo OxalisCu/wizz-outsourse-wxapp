@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import Taro, {useReachBottom, useTabItemTap, usePullDownRefresh, useDidShow, loadFontFace} from '@tarojs/taro'
+import Taro, {useReachBottom, useTabItemTap, usePageScroll} from '@tarojs/taro'
 import {View, Input, Image, Text} from '@tarojs/components'
 import {AtTabs, AtTabsPane, AtMessage} from 'taro-ui'
 import PostCard from '../../../components/posts/postCard/index'
 import Modal from '../../../components/modal/index'
 import { getZones, getPostList, PostMsg, getUserExp, UserExp, getToken} from '../../../model/api/index'
 import LoginModal from '../../../components/login/index'
+import { useStore } from '../../../model/store'
 
 import './index.scss'
 
@@ -21,37 +22,42 @@ export default () => {
   const [openLogin, setOpenLogin] = useState(false);
   const [trigger, setTrigger] = useState(Symbol());
 
-  const [searchData, setSearchData] = useState('');   // 搜索框内容
+  // const [searchData, setSearchData] = useState('');   // 搜索框内容
   const [userExp, setUserExp] = useState<UserExp>();
   const [zones, setZones] = useState<Array<Zone>>([]);   // 分区列表
   const [posts, setPosts] = useState<Array<Array<PostMsg>>>([]);   // 获取当前分区帖子信息
+  const [isPay, setIsPay] = useState<boolean>();    // 是否付费
 
   const [current, setCurrent] = useState(0);    // 当前选择分区
   const [page, setPage] = useState(1);    // 当前第几页
+  const [loadOnce, setLoadOnce] = useState(false);
+  const [postMap, setPostMap] = useState<Array<boolean>>([]);
 
   const [refresh, setRefresh] = useState(false);    // 显示顶部刷新动效
   const [loadMore, setLoadMore] = useState(false);    // 显示底部加载动效
-  const [editor, setEditor] = useState(false);    // 是否进入编辑帖子页面
 
-  let loadOnce = false;
-  let postMap = [];
-  let time = 0;
+  const [sticky, setSticky] = useState(false);    // 是否置顶 tabbar
+
+  const [contentHeight, setContentHeight] = useState<number>(0);
+
+  const [rState, rActions] = useStore('Refresh');
 
   //  初次进入社区
   useEffect(() => {
     // Taro.setEnableDebug({
     //   enableDebug: true
     // })
+
     ;(
       async()=>{
         try{
           let id = Taro.getStorageSync('id');
           if(id){
             setIsLogin(true);
-           
+            
             // 使用测试 token
             let token = await getToken({id,});
-            console.log(token);
+            // console.log(token);
             Taro.setStorageSync('token', token.data);
 
             await loadUserExp();
@@ -59,6 +65,11 @@ export default () => {
           }else{
             setOpenLogin(true);
             setTrigger(Symbol());
+          }
+
+          let client = await Taro.getSystemInfo();
+          if(client){
+            setContentHeight(client.safeArea.height - 86/client.pixelRatio);
           }
         }catch(err){console.log(err)}
       }
@@ -96,6 +107,8 @@ export default () => {
     const expRes = await getUserExp({id: Taro.getStorageSync('id')});
     if(expRes.data.success){
       setUserExp(expRes.data.data);
+      setIsPay(expRes.data.data.type > 0 && expRes.data.data.expireTime > new Date().getTime());
+      // console.log('isPay', expRes.data.data.expireTime > new Date().getTime());
       try{
         Taro.setStorageSync('userExp', expRes.data.data);
       }catch(err){console.log(err);}
@@ -104,6 +117,8 @@ export default () => {
 
   // 登录后获取分区和首页帖子信息
   const loadPosts = async ()=>{
+    console.log('loadPosts');
+
     let zoneRes = await getZones();
     let zoneData = [{title: '全部'}, {title: '精品'}];
     zoneRes.data.data.map((item, index) => {
@@ -111,6 +126,7 @@ export default () => {
         title: item.name
       }
     })
+    // console.log('zone', zoneRes);
     Taro.setStorageSync('zones', zoneData);
     setRefresh(true);
     setPage(1);
@@ -121,7 +137,7 @@ export default () => {
   }
 
   // 获取某分区某页帖子信息，返回获取成功或失败
-  const loadPage = async (index: number, nowPage: number, more: boolean, time?: number): Promise<boolean> => {
+  const loadPage = async (index: number, nowPage: number, more: boolean): Promise<boolean> => {
     // 多重数组深拷贝
     function deepcopy(obj) {
       var out = [],i = 0,len = obj.length;
@@ -133,32 +149,29 @@ export default () => {
       }
       return out;
     }
-    
 
     let postRes = await getPostList({
       zone: index,
       page: nowPage
     })
-    // console.log(postRes);
+    console.log(postRes);
     if(postRes.data.success){
       let postData = deepcopy(posts);
       if(!more){    // 若是换分区则清空 postMap
         postData[index] = postRes.data.data.records;
       }else{
+        let map = [...postMap];
         postRes.data.data.records.map((item)=>{
-          if(!postMap[item.id]){
+          if(!map[item.id]){
             postData[index].push(item);
-            postMap[item.id] = true; 
+            map[item.id] = true;
           }
         })
-
-        // postData[index] = [...posts[index], ...postRes.data.data.records]
+        setPostMap(map);
       }
       setPosts(postData);
       console.log('postData',postData);
-      console.log('page', nowPage);
-
-      console.log(time);
+      // console.log('page', nowPage);
       return true;
     }else{
       Taro.showToast({
@@ -179,49 +192,62 @@ export default () => {
   }
 
   // 触底加载更多数据
-  useReachBottom(() => {
-    console.log(loadOnce); 
-    if(new Date().getTime() - time < 2000){
-      return;
+  useReachBottom(async() => {
+    if(!loadOnce){
+      setLoadMore(true);
     }
-    time = new Date().getTime();
-    (
-      async ()=> {
-        setLoadMore(true);
-        if(userExp.type > 0 && !loadOnce){
-          console.log(time); 
-          loadOnce = true;
-          await loadPage(current, page + 1, true, time);
+  })
+
+  // tabbar 上划隐藏，下滑显示
+  usePageScroll((e) => {
+    if(e.scrollTop > 50){
+      sticky || setSticky(true);
+    }else{
+      sticky && setSticky(false);
+    }
+  })
+
+  useEffect(() => {
+    console.log(loadOnce);
+    ;(
+      async () => {
+        if(loadMore && isPay && !loadOnce){
+          setLoadOnce(true);
+          await loadPage(current, page + 1, true);
           setPage(page + 1);
+          // console.log(page);
           setLoadMore(false);
-          loadOnce = false;
+          setLoadOnce(false);
         }
       }
     )()
-  })
+   
+  }, [loadMore])
 
-  // 编辑帖子后刷新
-  // useDidShow(async () => {
-  //   if(editor){
-  //     Taro.pageScrollTo({
-  //       scrollTop: 0,
-  //       duration: 500
-  //     })
-  //     setRefresh(true);
-  //     setPage(1);
-  //     await loadPage(current, 1, false);
-  //     setRefresh(false);
-  //   }
-  // })
+  // 刷新首页
+  useEffect(() => {
+    ;(
+      async() => {
+        if(rState.open){
+          Taro.pageScrollTo({
+            scrollTop: 0,
+            duration: 500
+          })
+          setRefresh(true);
+          setPage(1);
+          await loadPage(current, 1, false);
+          setRefresh(false);
+          rActions.refresh(false);
+        }
+      }
+    )()
+  }, [rState.open])
 
   // 创建帖子
   const createPost = () => {    // 创建帖子
-    if(userExp.type > 0){
+    if(isPay){
       Taro.navigateTo({
         url: '../postEditor/index',
-        success(res){
-          setEditor(true);
-        }
       })
     }else{
       Taro.showToast({
@@ -246,8 +272,8 @@ export default () => {
         )
       }
       <View className='main'>
-          {/* 搜索框 */}
-        <View className='search'>
+        {/* 搜索框 */}
+        {/* <View className='search'>
           <Input
             className='input'
             onInput={(e)=>{setSearchData(e.detail.value)}} 
@@ -262,45 +288,43 @@ export default () => {
               ''
             )
           }
-        </View>
+        </View> */}
 
         {/* 帖子分区选项卡 */}
         <AtTabs
-          className='posts'
+          className={'posts' + (sticky ? ' sticky' : '')}
           current={current}
           scroll
+          // swipeable={false}
+          // animated={false} 
           tabList={zones}
           onClick={changeZone}
         >
           {
             zones.length != 0 &&  zones.map((item, i1) => {
-              if(i1 == current){
-                return (
-                  <AtTabsPane className='post-tabs' current={current} index={i1}>
+              return (
+                <AtTabsPane current={current} index={i1} key={i1}>
+                  <View className='post-tabs' style={{minHeight: contentHeight + 'px'}}>
                     {
                       refresh && (
                         <View className='refresh'>刷新...</View>
                       )
                     }
                     {
-                      posts[current] != undefined && posts[current].length != 0 && posts[current].map((item, i2) => {
+                      posts[i1] != undefined && posts[i1].length != 0 && posts[i1].map((item, i2) => {
                         return (
                           <View className='post-item' key={item.id}>
                             <PostCard
                               postData={item}
                             />
+                            <View className='post-divider' />
                           </View>
                         )
                       })
                     }
-                  </AtTabsPane>
-                )
-              }else{
-                return (
-                  <AtTabsPane current={current} index={i1}>
-                  </AtTabsPane>
-                )
-              }
+                  </View>
+                </AtTabsPane>
+              )
             })
           }
         </AtTabs>
@@ -309,13 +333,10 @@ export default () => {
         <View className='edit-btn' onClick={createPost}>
           <Image className='icon' src={fatie}></Image>
         </View>
-
-        {/* 导入带蒙层的操作按钮 */}
-        <Modal page='posts' />
       </View>
       {
         loadMore && (
-          userExp.type == 0 ? (
+          !isPay ? (
             <View className='bottom-pay'>
               <Text>免费版仅可查看五条结果</Text>
               <Text onClick={payBtn}>升级会员，即可查看更多，前往升级</Text>
@@ -325,6 +346,8 @@ export default () => {
           )
         )
       }
+      {/* 导入带蒙层的操作按钮 */}
+      <Modal page='posts' />
     </View>
   )
 }

@@ -90,6 +90,7 @@ export default () => {
         className='record-tabs'
         current={current}
         tabList={recordTabs}
+        swipeable={false}
         onClick={changeTab}
       >
         {

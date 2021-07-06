@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Taro, {useDidShow, useReady} from '@tarojs/taro'
 import {View, Text} from '@tarojs/components'
-import {UserExp} from '../../../../model/api/index'
+import {useStore} from '../../../../model/store'
 
 import './index.scss'
 
@@ -9,43 +9,39 @@ export default (props) => {
   const {content, detail, id} = props;
   const [wrap, setWrap] = useState(false);
 
-  const idStr = detail ? '' : 'id-'+id;
-
-  const [userExp, setUserExp] = useState<UserExp>();
-
-  useEffect(() => {
-    try{
-      let exp = Taro.getStorageSync('userExp');
-      if(exp){
-        setUserExp(exp);
-      }
-    }catch(err){console.log(err)}
-  }, [])
+  const [wState, wActions] = useStore('Wrap');
 
   // 文本折叠
   useEffect(() => {
-    const time = setInterval(()=>{
-      // console.log('demo');
+    if(detail) {
+      return;
+    }
 
+    if(wState.wrap[id]){
+      setWrap(true);
+      return;
+    }
+
+    const time = setInterval(()=>{
       const query = Taro.createSelectorQuery();
       query
-      .select('#' + idStr)
+      .select('.texts-container>.id-' + id)
       .boundingClientRect((rect) => {
-        // console.log(rect);
         if(rect == null){
           return;
         }else{
           clearInterval(time);
         }
-        var h = rect.height;     // 高度 px
-        // console.log('height',h);
-        var pixelRatio;             // 倍率 dpr
+        let h = rect.height;     // 高度 px
+        let pixelRatio;             // 倍率 dpr
         Taro.getSystemInfo()
         .then(res => pixelRatio = res.pixelRatio)
         .then(()=>{
           if(h*pixelRatio > 15*44){
-            // console.log(h*pixelRatio);
             setWrap(true);
+            let wrapTemp = [...wState.wrap];
+            wrapTemp[id] = true;
+            wActions.setWrap(wrapTemp);
           }
         })
       })
@@ -55,7 +51,7 @@ export default (props) => {
 
   return (
     <View className='texts-container'>
-      <View id={idStr} className={wrap ? 'content wrap' : 'content'}>
+      <View className={('id-' + id + ' ') + 'content ' + (wrap ? 'wrap' : '')}>
         <Text>{content}</Text>
       </View>
       {

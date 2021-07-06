@@ -21,6 +21,7 @@ export default () => {
   const [trigger, setTrigger] = useState(Symbol());
 
   const rankList = ['免费用户', '小透明', '热心肠', '积极分子', '大佬', '合伙人', '管理员'];
+  const [isPay, setIsPay] = useState(false);
 
   const [avatarUrl, setAvatarUrl] = useState();
   const [nickName, setNickName] = useState();
@@ -77,6 +78,7 @@ export default () => {
     }catch(err){console.log(err)}
     if(expRes.data.success){
       setUserExp(expRes.data.data);
+      setIsPay(expRes.data.data.type > 0 && expRes.data.data.expireTime > new Date().getTime());
       try{
         Taro.setStorageSync('userExp', expRes.data.data);
       }catch(err){console.log(err);}
@@ -121,7 +123,7 @@ export default () => {
               <View className='msg'>
                 <View className='name-msg'>
                   <Text className='name'>{nickName}</Text>
-                  <Image className='type' src={usertype}></Image>
+                  {!isPay && <Image className='type' src={usertype}></Image>}
                 </View>
                 <View className='experience'>
                   <Text className='title'>{rankList[userExp.type]}</Text>

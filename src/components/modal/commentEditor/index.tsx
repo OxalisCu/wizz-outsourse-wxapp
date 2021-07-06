@@ -16,6 +16,8 @@ export default () => {
   const [nickName, setNickName] = useState();
   const [userAvatar, setUserAvatar] = useState();
 
+  const [toType, setToType] = useState<string>('');
+
   // var keyBoardHeight = 0;   // 存储键盘高度信息
 
   const [comment, setComment] = useState('');
@@ -35,31 +37,38 @@ export default () => {
     }catch(err){console.log(err)}
   }, [])
 
+  useEffect(() => {
+    if(mState.addComment != null){
+      setToType(mState.addComment.type === 1 ? '评论' : '回复');
+    }
+  }, [mState.addComment])
+
   const submitCom = (e) => {  //提交评论
     (
       async ()=>{
         setComment(removeSpace(e.detail.value.comment));
-        console.log(e.detail.value.comment,mState);
         const commentRes = await postComment({
-          toType: mState.type == '评论' ? '1' : '0',
-          toId: mState.id,
+          toType: mState.addComment.type,
+          toId: mState.addComment.type == 1 ? mState.addComment.postId : mState.addComment.toId,
           message: removeSpace(e.detail.value.comment)
         })
         if(commentRes.data.success){
           Taro.showToast({
-            title: mState.type + '发表成功',
+            title: toType + '发表成功',
             icon: 'none'
           })
-          mActions.commentMsg({
+          let addTemp = {...mState.addComment};
+          addTemp.comment = {
             id: commentRes.data.data.id,     // 新发表的评论的 id
             content: e.detail.value.comment,
             createTime: new Date().getTime(),
-            reply: mState.type == '评论' ? null : mState.id,
+            reply: mState.addComment.toId,   // null 为评论，否则会回复
             user: userExp.id,
             userAvatar: userAvatar,
             userName: nickName,
             userType: userExp.type
-          })
+          }
+          mActions.addComment(addTemp);
           mActions.closeModal({
             success: 'commentEditor'
           })
@@ -93,19 +102,25 @@ export default () => {
   return (
     <View className='comment-editor-container' onClick={(e)=>{e.stopPropagation();}}>
       <Form onSubmit={submitCom}>
-        <View className='input-title'>{mState.type + ' ' + mState.name}</View>
-          <Textarea 
-            className='input-area' 
-            name='comment'
-            placeholder='文明发言'
-            placeholderClass='input-holder'
-            showConfirmBar={false}
-            maxlength={500}
-            autoFocus
-            fixed
-            onInput={getInput}
-            // onKeyboardHeightChange={changeHeight} 
-          />
+        {
+          toType != '' && (
+            <View className='input-title'>
+              {toType + ' ' + mState.addComment.name}
+            </View>
+          )
+        }
+        <Textarea 
+          className='input-area' 
+          name='comment'
+          placeholder='文明发言'
+          placeholderClass='input-holder'
+          showConfirmBar={false}
+          maxlength={500}
+          autoFocus
+          fixed
+          onInput={getInput}
+          // onKeyboardHeightChange={changeHeight} 
+        />
         <View className='operate-line'>
           {/* <Image className='left' src={biaoqing}></Image> */}
           <View className='left'></View>

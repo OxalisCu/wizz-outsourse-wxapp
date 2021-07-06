@@ -2,128 +2,87 @@ import React, {useState, useEffect} from 'react'
 import {View, Text, Image} from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import UserCard from '../userCard/index'
-import CommentPre from '../commentPreview/index'
-import {useStore} from '../../../model/store/index'
 import {CommentItem, UserMsg, UserExp} from '../../../model/api/index'
 
 import './index.scss'
 
 export default (props) => {
-  const [userMsg, setUserMsg] = useState<UserMsg>();
-  const [previewMsg, setPreviewMsg] = useState<Array<CommentItem>>(props.previewMsg);
+  const commentItem: Array<CommentItem> = props.commentItem;
+  const postId: number = props.postId;
+  const postCreator: number = props.postCreator;
+
+  const commentEditor = props.commentEditor;
   const commentDelete = props.commentDelete;
-  
-  const [userExp, setUserExp] = useState<UserExp>();
-  const [wrap, setWrap] = useState<boolean>();
 
-  const [mState, mActions] = useStore('Modal');
-
-  useEffect(() => {
-    try{
-      let exp = Taro.getStorageSync('userExp');
-      if(exp){
-        setUserExp(exp);
-      }
-    }catch(err){console.log(err)}
-  }, [])
-
-  useEffect(() => {
-    if(previewMsg != null && previewMsg.length != 0){
-      setUserMsg({
-        creator: previewMsg[0].user,
-        creatorName: previewMsg[0].userName,
-        avatar: previewMsg[0].userAvatar,
-        createTime: previewMsg[0].createTime,
-        userType: previewMsg[0].userType
-      })
-    }
-    // console.log('previewMsg',previewMsg);
-  }, [])
+  const [map, setMap] = useState<Array<string>>([]);
+  const [loading, setLoading]  = useState(true);
 
   useEffect(()=>{
-    if(previewMsg.length > 5){
-      setWrap(true);
-    }else{
-      setWrap(false);
-    }
-  }, [previewMsg])
-
-  // 管理员、帖子发布者、评论发表者可删除评论
-  const replyDelete = (item) => {   // 删除评论或回复
-    if(userExp.type == 6 || userExp.id == userMsg.creator || userExp.id == previewMsg[0].user){
-      mActions.openModal({
-        mask: 'commentDelete',
-        page: 'postDetail',
-        id: item.id,
+    if(commentItem != null && commentItem.length != 0){
+      commentItem.map((item) => {
+        map[item.id] = item.userName;
       })
+      setMap(map);
+      setLoading(false);
     }
-  }
-
-  const replyEditor = (item) => {    // 回复
-    mActions.openModal({
-      mask: 'commentEditor',
-      page: 'postDetail',
-      id: item.id,
-      name: item.userName,
-      type: '回复',
-    })
-  }
-
-  useEffect(()=>{
-    let preview = [];
-    if(mState.success == 'commentDelete'){
-      // 删除回复
-      previewMsg.map((item, index) => {
-        if(item.id != mState.id){
-          preview.push(item);
-        }
-      })
-      setPreviewMsg(preview);
-    }else if(mState.success == 'commentEditor'){
-      // 回复评论，放在最末尾
-      [...preview] = previewMsg;
-      preview.push(mState.comment);
-      mActions.commentMsg(null);
-      setPreviewMsg(preview);
-      // console.log('replyPreview',preview);
-    }
-    mActions.closeModal({
-      success: ''
-    })
-  }, [mState.success])
+  }, [commentItem])
 
   const viewDetail = () => {
     try{
       // 存储回复信息
-      Taro.setStorageSync('commentDetail', previewMsg);
+      Taro.setStorageSync('commentDetail', commentItem);
       Taro.navigateTo({
-        url: '../commentDetail/index'
+        url: '../commentDetail/index?id=' + postId + '&creator=' + postCreator
       })
     }catch(err){console.log(err);}
   }
 
-  return previewMsg != null && previewMsg.length != 0 && userMsg != null && (
+  return commentItem != null && commentItem.length != 0 && !loading && (
     <View className='comment-container'>
       {/* 评论详情 */}
       <UserCard
         className='head'
         editable={false}
-        userMsg={userMsg}
+        userMsg={{
+          creator: commentItem[0].user,
+          creatorName: commentItem[0].userName,
+          createTime: commentItem[0].createTime,
+          avatar: commentItem[0].userAvatar,
+          userType: commentItem[0].userType
+        }}
       />
-  
-      <View className='main-content' onClick={()=>{replyEditor(previewMsg[0])}} onLongPress={()=>{commentDelete(previewMsg[0])}}>
-        <Text>{previewMsg[0].content}</Text>
+      <View className='main-content' onClick={(e)=>{commentEditor(commentItem[0].id, commentItem[0].userName)}} onLongPress={()=>{commentDelete(commentItem[0].id)}}>
+        <Text>{commentItem[0].content}</Text>
       </View>
 
       {/* 评论或回复预览 */}
-      <CommentPre
-        detail
-        previewMsg={previewMsg}
-        wrap={wrap}
-        commentDelete={replyDelete}
-        commentEditor={replyEditor}
-        viewDetail={viewDetail}
-      />
+      {
+        commentItem.length > 1 && (
+          <View className='reply-container'>
+          {
+            commentItem.map((item, index) => {
+              if(index == 0 || index > 5){
+                return '';
+              }else{
+                return (  
+                  <View className='reply-item' key={item.id} onClick={(e)=>{commentEditor(item.id, item.userName)}} onLongPress={()=>{commentDelete(item.id)}}>
+                    <Text className='name'>{item.userName}</Text>
+                    <Text className='between'>回复</Text>
+                    <Text className='name'>{map[item.reply]}：</Text>
+                    <Text className='content'>{item.content}</Text>
+                  </View>
+                )
+              }
+            })
+          }
+          {
+            commentItem.length > 6 && (
+              <View className='more' onClick={viewDetail}>查看全部回复</View>
+            )
+          }
+          </View>
+        )
+      }
     </View>
   )
 }
