@@ -29,4 +29,4 @@ $ npm install
 ```
 
 #### 参与贡献
-[czr]:(https://github.com/caizirui)
+[caizirui](https://github.com/caizirui)
