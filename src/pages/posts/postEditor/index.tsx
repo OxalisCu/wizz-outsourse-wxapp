@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import {View, Text, Textarea, Image} from '@tarojs/components'
-import Taro, { useRouter } from '@tarojs/taro'
+import Taro, { useRouter, useDidHide } from '@tarojs/taro'
 import SparkMD5 from 'spark-md5'
 import FileUpload from '../../../components/posts/fileUpload/index'
 import Navbar from '../../../components/navbar/index'
@@ -65,6 +65,8 @@ export default () => {
   const [lineCount, setLineCount] = useState(1);
   const [safeArea, setSafeArea] = useState<SafeArea>();
 
+  const [loading, setLoading] = useState<number>(-1);
+
   const [mState, mActions] = useStore('Modal');
   const [rState, rActions] = useStore('Refresh');
  
@@ -89,6 +91,13 @@ export default () => {
       }
     })
   }, [])
+
+  // 关闭模态框
+  useDidHide(() => {
+    mActions.closeModal({
+      success: ''
+    });
+  })
 
   // 获取帖子编辑数据
   useEffect(()=>{
@@ -148,7 +157,7 @@ export default () => {
   }
 
   const getOssUrl = async () => {
-    loading(0);
+    setLoading(0);
 
     if(images.length == 0 && files.length == 0){
       // console.log('ddeomo');
@@ -176,7 +185,7 @@ export default () => {
         if(url.data.success){
           url1.push(url.data.data.url);
         }else{
-          loading(1);
+          setLoading(1);
           setUpload(false);
           return;
         }
@@ -285,12 +294,12 @@ export default () => {
           if(createRes.data.success){
             if(id == null){
               if(failNums == 0){
-                loading(2);
+                setLoading(2);
               }else{
-                loading(1);
+                setLoading(1);
               }
             }else{
-              loading(3);
+              setLoading(3);
             }
           }else{
             Taro.showToast({
@@ -304,9 +313,8 @@ export default () => {
     )()
   }, [upload])
 
-  const loading = (type: number) => {
-    console.log(type);
-    if(type == 0){
+  useEffect(() => {
+    if(loading == 0){
       Taro.hideToast();
       Taro.showToast({
         title: '帖子创建中...',
@@ -315,10 +323,10 @@ export default () => {
     }else{
       Taro.hideToast();
       Taro.showToast({
-        title: msgType[type],
+        title: msgType[loading],
         icon: 'none'
       })
-      if(type == 3 || type == 2){
+      if(loading == 3 || loading == 2){
         setTimeout(()=>{
           Taro.navigateBack({
             delta: 1,
@@ -329,8 +337,8 @@ export default () => {
         }, 100)
       }
     } 
-  }
-
+  } ,[loading])
+  
   const chooseImg = () => {
     if(images.length == 9){
       Taro.showToast({

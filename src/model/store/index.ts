@@ -2,8 +2,9 @@ import { Model } from 'react-model'
 import Modal from './modal'
 import Wrap from './wrap'
 import Refresh from './refresh'
+import Operate from './operate'
 
-const models = { Modal, Wrap, Refresh }
+const models = { Modal, Wrap, Refresh, Operate }
 
 export const {
   getInitialState,

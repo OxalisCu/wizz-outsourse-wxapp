@@ -9,11 +9,11 @@ import './index.scss'
 export default () => {
 
   const [mState, mActions] = useStore('Modal');
+  const [oState, oActions] = useStore('Operate');
 
   const deleteComment = async () => {
-    console.log('delComment', mState.delComment);
     const delRes = await delComment({
-      id: mState.delComment.toId
+      id: oState.delComment.toId
     })
 
     if(delRes.data.success){

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Taro from '@tarojs/taro'
+import Taro, { useTabItemTap } from '@tarojs/taro'
 import {View, Image, Text} from '@tarojs/components'
 import Texts from './texts/index'
 import Imgs from './imgs/index'
@@ -26,7 +26,8 @@ export default (props) => {
   const userMsg: UserMsg = props.userMsg;
   const contentMsg: ContentMsg = props.contentMsg;
   const zoneMsg: ZoneMsg = props.zoneMsg;
-  const [likeMsg, setLikeMsg] = useState<LikeMsg>(props.likeMsg);
+  
+  const [likeMsg, setLikeMsg] = useState<LikeMsg>();
 
   const viewDetail = props.viewDetail;
   const commentEditor = props.commentEditor;
@@ -37,7 +38,7 @@ export default (props) => {
   const [nickName, setNickName] = useState<string>();
   const [isPay, setIsPay] = useState<boolean>();
 
-  const [mState, mActions] = useStore('Modal');
+  const [oState, oActions] = useStore('Operate');
 
   useEffect(() => {
     try{
@@ -51,6 +52,8 @@ export default (props) => {
 
   useEffect(() => {
     try{
+      setLikeMsg(props.likeMsg);
+      oActions.likeOperate(null);
       let exp = Taro.getStorageSync('userExp');
       let name = Taro.getStorageSync('nickName');
       if(exp && name){
@@ -61,31 +64,29 @@ export default (props) => {
     }catch(err){console.log(err)}
   }, [])
 
-  // 将用户点赞放在第一位
-  useEffect(() => {
-    if(likeMsg.isLiked && userExp){
-      let temp = likeMsg;
-      temp.likers.map((item, index) => {
-        if(item.id == userExp.id){
-          let demo = item;
-          temp.likers.splice(index, 1);
-          temp.likers.unshift(demo);
-        }
-      })
-    }
-  }, [likeMsg, userExp])
+  // 点赞
+  const like = () => {    
+    oActions.likeOperate({
+      postId: contentMsg.id,
+      open: true
+    })
+  }   
 
-  const like = () => {    // 点赞
+  useEffect(() => {
     ;(
       async () => {
-        if(!isPay){
+        if(likeMsg == null || oState.likeOperate == null || !oState.likeOperate.open || oState.likeOperate.postId != contentMsg.id){
+          oActions.likeOperate(null);
+          return;
+        }else if(!isPay){
+          oActions.likeOperate(null);
           Taro.showToast({
             title: '免费用户不能点赞',
             icon: 'none'
           })
           return;
         }
-
+        
         let likeRes;
         if(likeMsg.isLiked){
           likeRes = await deleteLike({
@@ -96,42 +97,49 @@ export default (props) => {
             id: contentMsg.id
           })
         }
-        // console.log('likeRes',likeRes);
+
+        console.log('likeRes', likeRes);
         if(likeRes.data.success){
           let temp: LikeMsg = {
             isLiked: false,
             likeCount: 0,
             likers: []
           };
-          if(likeMsg.isLiked){
+          if(likeMsg.isLiked){    // 取消点赞
             temp.isLiked = false;
             temp.likeCount = likeMsg.likeCount - 1;
-            temp.likers = likeMsg.likers;
+            temp.likers = [];
             likeMsg.likers.map((item, index) => {   // 清除用户点赞数据
-              if(userExp.id == item.id){
-                temp.likers.splice(index, 1);
+              if(userExp.id != item.id){
+                temp.likers.push({...item});
               }
-            })
-          }else{
+            })    
+          }else{    // 点赞
             temp.isLiked = true;
             temp.likeCount = likeMsg.likeCount + 1;
-            temp.likers = likeMsg.likers;
+            temp.likers = [];
+            likeMsg.likers.map((item, index) => {   // 添加用户点赞数据
+              temp.likers.push({...item});
+            })
             temp.likers.unshift({
               id: userExp.id,
               name: nickName
             });
           }
           setLikeMsg(temp);
-          // console.log(temp);
+
+          console.log('likeMsg', temp);
         }else{
           Taro.showToast({
             title: likeRes.data.message,
             icon: 'none'
           })
         }
+
+        oActions.likeOperate(null);
       }
     )()
-  }   
+  }, [oState.likeOperate])
 
 
   return (
@@ -170,7 +178,7 @@ export default (props) => {
           }
         </View>
         {
-          !detail && (
+          !detail && likeMsg != null && (
             <View className='operate'>
               <View className='comment'>
                 <Image className='icon' src={pinglun} onClick={()=>{commentEditor(null, null)}}></Image>
@@ -194,7 +202,7 @@ export default (props) => {
         />
       </View>
       {
-        detail && (
+        detail && likeMsg != null && (
           <View className='like-bottom' onClick={like}>
             <Image className='icon' src={likeMsg.isLiked ? zan_active : zan}></Image>
             {

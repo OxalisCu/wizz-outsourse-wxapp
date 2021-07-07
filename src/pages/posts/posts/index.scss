@@ -56,6 +56,10 @@
             text-align: center;
             color: #D5D5D5;
           }
+          .fill-item{
+            height: 86px;
+            width: 100%;
+          }
           .post-item{
             .post-divider{
               background-color: #999999;
@@ -76,7 +80,7 @@
         z-index: 99;
         position: fixed;
         top: 0;
-        box-shadow: 0 2px 5px 5px #F3F3F3;
+        box-shadow: 0 2px 3px 3px #F3F3F3;
       }
     }
     .edit-btn{

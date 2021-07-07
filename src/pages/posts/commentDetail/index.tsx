@@ -1,5 +1,5 @@
 import React, {useState, useEffect } from 'react'
-import Taro, {useRouter} from '@tarojs/taro'
+import Taro, {useRouter, useDidHide} from '@tarojs/taro'
 import {View, Text} from '@tarojs/components'
 import UserCard from '../../../components/posts/userCard/index'
 import CommentBar from '../../../components/posts/commentBar/index'
@@ -20,6 +20,7 @@ export default () => {
   const [userExp, setUserExp] = useState<UserExp>();
 
   const [mState, mActions] = useStore('Modal');
+  const [oState, oActions] = useStore('Operate');
 
   useEffect(()=>{
     try{
@@ -44,12 +45,19 @@ export default () => {
     }
   }, [commentDetail])
 
+  // 关闭模态框
+  useDidHide(() => {
+    mActions.closeModal({
+      success: ''
+    });
+  })
+
   const commentEditor = (toId: number | null, toName: string | null) => {
     mActions.openModal({
       page: 'commentDetail',
       mask: 'commentEditor',
     })
-    mActions.addComment({
+    oActions.addComment({
       toId,
       postId: postId,
       name: toName,
@@ -65,7 +73,7 @@ export default () => {
         mask: 'commentDelete',
         page: 'commentDetail',
       })
-      mActions.delComment({
+      oActions.delComment({
         toId,
         postId: postId,
       })
@@ -74,9 +82,9 @@ export default () => {
 
   useEffect(() => {
     let commentList = [];
-    if(mState.success == 'commentDelete' && mState.delComment.postId == postId){
+    if(mState.success == 'commentDelete' && oState.delComment.postId == postId){
       commentDetail.map((item) => {   // 删除回复
-        if(item.id != mState.delComment.toId){
+        if(item.id != oState.delComment.toId){
           commentList.push(item);
         }
       })
@@ -84,8 +92,8 @@ export default () => {
       mActions.closeModal({
         success: ''
       })
-    }else if(mState.success == 'commentEditor' && mState.addComment.postId == postId){
-      commentList = [...commentDetail, mState.addComment.comment];
+    }else if(mState.success == 'commentEditor' && oState.addComment.postId == postId){
+      commentList = [...commentDetail, oState.addComment.comment];
       setCommentDetail(commentList);
       mActions.closeModal({
         success: ''

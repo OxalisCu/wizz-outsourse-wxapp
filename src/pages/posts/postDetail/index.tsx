@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Taro, { useRouter, useDidShow } from '@tarojs/taro'
+import Taro, { useRouter, useDidShow, useDidHide } from '@tarojs/taro'
 import {View} from '@tarojs/components'
 import UserCard from '../../../components/posts/userCard'
 import ContentCard from '../../../components/posts/contentCard'
@@ -20,6 +20,7 @@ export default () => {
   const [isPay, setIsPay] = useState<boolean>();   
 
   const [mState, mActions] = useStore('Modal');
+  const [oState, oActions] = useStore('Operate');
   const [rState, rActions] = useStore('Refresh');
 
   useEffect(() => {
@@ -45,8 +46,13 @@ export default () => {
         icon: 'none'
       })
     }
-  }
-  )
+  })
+
+  useDidHide(() => {
+    mActions.closeModal({
+      success: ''
+    });
+  })
 
   // 付费用户评论
   const commentEditor = (toId: number | null, toName: string | null) => {
@@ -61,7 +67,7 @@ export default () => {
       mask: 'commentEditor',
       page: 'postDetail',
     })
-    mActions.addComment({
+    oActions.addComment({
       toId,
       postId: postData.id,
       name: toId == null ? postData.creatorName : toName,
@@ -77,7 +83,7 @@ export default () => {
         mask: 'commentDelete',
         page: 'postDetail',
       })
-      mActions.delComment({
+      oActions.delComment({
         postId: postData.id,
         toId,
       })
@@ -87,14 +93,14 @@ export default () => {
   // 删除或添加评论
   useEffect(()=>{
     let commentList = [];
-    if(mState.success == 'commentDelete' && mState.delComment.postId == postData.id){
+    if(mState.success == 'commentDelete' && oState.delComment.postId == postData.id){
       commentMsg.map((com, i1) => {   // 删除评论
-        if(com[0].id == mState.delComment.toId){   
+        if(com[0].id == oState.delComment.toId){   
           return;
         }
         let temp = [];
         com.map((item, i2) => { 
-          if(item.id != mState.delComment.toId){   // 删除回复
+          if(item.id != oState.delComment.toId){   // 删除回复
             temp.push(item);
           }
         })
@@ -104,23 +110,23 @@ export default () => {
       mActions.closeModal({
         success: ''
       })
-    }else if(mState.success == 'commentEditor' && mState.addComment.postId == postData.id){
-      if(mState.addComment.comment.reply == null){   // 评论，新发表放在最上面
+    }else if(mState.success == 'commentEditor' && oState.addComment.postId == postData.id){
+      if(oState.addComment.comment.reply == null){   // 评论，新发表放在最上面
         commentList = [...commentMsg];
-        commentList.unshift([mState.addComment.comment]);  
+        commentList.unshift([oState.addComment.comment]);  
         setCommentMsg(commentList);
       }else{    // 回复，新发表放在最后
         commentMsg.map((comment, i1) => {
           let temp = [];
           let hasReply = false;
           for(let item of comment){
-            if(item.id == mState.addComment.comment.reply){
+            if(item.id == oState.addComment.comment.reply){
               hasReply = true;
               break;
             }
           }
           if(hasReply){
-            temp = [...comment, mState.addComment.comment];
+            temp = [...comment, oState.addComment.comment];
           }else{
             temp = [...comment];
           }

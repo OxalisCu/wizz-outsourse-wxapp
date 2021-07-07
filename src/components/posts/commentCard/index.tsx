@@ -68,7 +68,7 @@ export default (props) => {
                   <View className='reply-item' key={item.id} onClick={(e)=>{commentEditor(item.id, item.userName)}} onLongPress={()=>{commentDelete(item.id)}}>
                     <Text className='name'>{item.userName}</Text>
                     <Text className='between'>回复</Text>
-                    <Text className='name'>{map[item.reply]}：</Text>
+                    <Text className='name'>{map[item.reply] != undefined ? map[item.reply] : '已删除'}：</Text>
                     <Text className='content'>{item.content}</Text>
                   </View>
                 )

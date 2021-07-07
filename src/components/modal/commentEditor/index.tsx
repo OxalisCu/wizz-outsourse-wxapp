@@ -10,8 +10,6 @@ import biaoqing from '../../../images/biaoqing.png'
 import './index.scss'
 
 export default () => {
-  const [mState, mActions] = useStore('Modal');
-
   const [userExp, setUserExp] = useState<UserExp>();
   const [nickName, setNickName] = useState();
   const [userAvatar, setUserAvatar] = useState();
@@ -23,6 +21,9 @@ export default () => {
   const [comment, setComment] = useState('');
   const [words, setWords] = useState(0);
   // const [bottomHeight, setBottomHeight] = useState(40);
+
+  const [mState, mActions] = useStore('Modal');
+  const [oState, oActions] = useStore('Operate');
 
   useEffect(() => {
     try{
@@ -38,8 +39,8 @@ export default () => {
   }, [])
 
   useEffect(() => {
-    if(mState.addComment != null){
-      setToType(mState.addComment.type === 1 ? '评论' : '回复');
+    if(oState.addComment != null){
+      setToType(oState.addComment.type === 1 ? '评论' : '回复');
     }
   }, [mState.addComment])
 
@@ -48,8 +49,8 @@ export default () => {
       async ()=>{
         setComment(removeSpace(e.detail.value.comment));
         const commentRes = await postComment({
-          toType: mState.addComment.type,
-          toId: mState.addComment.type == 1 ? mState.addComment.postId : mState.addComment.toId,
+          toType: oState.addComment.type,
+          toId: oState.addComment.type == 1 ? oState.addComment.postId : oState.addComment.toId,
           message: removeSpace(e.detail.value.comment)
         })
         if(commentRes.data.success){
@@ -57,18 +58,18 @@ export default () => {
             title: toType + '发表成功',
             icon: 'none'
           })
-          let addTemp = {...mState.addComment};
+          let addTemp = {...oState.addComment};
           addTemp.comment = {
             id: commentRes.data.data.id,     // 新发表的评论的 id
             content: e.detail.value.comment,
             createTime: new Date().getTime(),
-            reply: mState.addComment.toId,   // null 为评论，否则会回复
+            reply: oState.addComment.toId,   // null 为评论，否则会回复
             user: userExp.id,
             userAvatar: userAvatar,
             userName: nickName,
             userType: userExp.type
           }
-          mActions.addComment(addTemp);
+          oActions.addComment(addTemp);
           mActions.closeModal({
             success: 'commentEditor'
           })
@@ -105,7 +106,7 @@ export default () => {
         {
           toType != '' && (
             <View className='input-title'>
-              {toType + ' ' + mState.addComment.name}
+              {toType + ' ' + oState.addComment.name}
             </View>
           )
         }

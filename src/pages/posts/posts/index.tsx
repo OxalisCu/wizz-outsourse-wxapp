@@ -38,6 +38,7 @@ export default () => {
 
   const [sticky, setSticky] = useState(false);    // 是否置顶 tabbar
 
+  const [pixelRatio, setPixelRatio] = useState<number>();
   const [contentHeight, setContentHeight] = useState<number>(0);
 
   const [rState, rActions] = useStore('Refresh');
@@ -69,6 +70,7 @@ export default () => {
 
           let client = await Taro.getSystemInfo();
           if(client){
+            setPixelRatio(client.pixelRatio as number);
             setContentHeight(client.safeArea.height - 86/client.pixelRatio);
           }
         }catch(err){console.log(err)}
@@ -200,7 +202,7 @@ export default () => {
 
   // tabbar 上划隐藏，下滑显示
   usePageScroll((e) => {
-    if(e.scrollTop > 50){
+    if(e.scrollTop > 86/pixelRatio){
       sticky || setSticky(true);
     }else{
       sticky && setSticky(false);
@@ -308,6 +310,11 @@ export default () => {
                     {
                       refresh && (
                         <View className='refresh'>刷新...</View>
+                      )
+                    }
+                    {
+                      sticky && (
+                        <View className='fill-item' />
                       )
                     }
                     {
