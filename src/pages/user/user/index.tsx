@@ -39,11 +39,11 @@ export default () => {
             if(id){
               setIsLogin(true);
     
-               // 使用测试 token
-               let token = await getToken({id,});
-               console.log(token);
-               Taro.setStorageSync('token', token.data);
-    
+              // 使用测试 token
+              let token = await getToken({id,});
+              console.log(token);
+              Taro.setStorageSync('token', token.data);
+  
               await loadUserExp();
               await loadMsgNum();
             }else{
@@ -87,6 +87,7 @@ export default () => {
 
   useDidShow(()=>{
     loadMsgNum();
+    loadUserExp();
   })
 
   // 获取未读消息
