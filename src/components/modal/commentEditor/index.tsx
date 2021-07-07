@@ -131,7 +131,7 @@ export default () => {
               <Text>{words}</Text>
               <Text>{' / 500'}</Text>
             </Text>
-            <Button className={words!=0 ? 'button-active' : ''} formType='submit' disabled={words==0}>发送</Button>
+            <Button className={words!=0 ? 'button-active' : ''} formType='submit' disabled={words==0}><Text>发送</Text></Button>
           </View>
         </View>
       </Form>
