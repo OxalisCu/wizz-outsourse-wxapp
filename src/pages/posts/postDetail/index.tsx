@@ -66,6 +66,7 @@ export default () => {
     mActions.openModal({
       mask: 'commentEditor',
       page: 'postDetail',
+      detail: true
     })
     oActions.addComment({
       toId,
@@ -77,7 +78,7 @@ export default () => {
   }
 
   // 管理员、帖子创建者、评论发表者删除评论
-  const commentDelete = (toId: number) => {
+  const commentDelete = (toId: number, type: number) => {
     if(userExp.type == 6 || userExp.id == postData.creator || userExp.id == postData.creator){
       mActions.openModal({
         mask: 'commentDelete',
@@ -86,6 +87,7 @@ export default () => {
       oActions.delComment({
         postId: postData.id,
         toId,
+        type,
       })
     }
   }
@@ -184,6 +186,7 @@ export default () => {
             avatar: postData.avatar,
             userType: postData.userType
           }}
+          editable
           editPost={editPost}
           deletePost={deletePost}
         />

@@ -11,6 +11,8 @@ export default () => {
   const [mState, mActions] = useStore('Modal');
   const [oState, oActions] = useStore('Operate');
 
+  const type = ['回复', '评论'];
+
   const deleteComment = async () => {
     const delRes = await delComment({
       id: oState.delComment.toId
@@ -18,7 +20,7 @@ export default () => {
 
     if(delRes.data.success){
       Taro.showToast({
-        title: '评论删除成功',
+        title: type[oState.delComment.type] + '删除成功',
         icon: 'none'
       })
       mActions.closeModal({

@@ -12,6 +12,7 @@ import caozuo from '../../../images/caozuo.png'
 
 export default (props) => {
   const userMsg: UserMsg = props.userMsg;
+  const editable: boolean = props.editable;
 
   const editPost = props.editPost;
   const deletePost = props.deletePost;
@@ -30,7 +31,7 @@ export default (props) => {
     }catch(err){console.log(err)}
   }, [])
 
-  return (
+  return userMsg != null && (
     <View className='head-container' onClick={()=>{setMore(false)}}>
         <UserNav>
           <Image className='avatar' src={userMsg.avatar}></Image>
@@ -49,7 +50,7 @@ export default (props) => {
           </View>
           {
             // 自己或管理员可以编辑帖子
-            userExp && (userExp.type == 6 || userMsg.creator == userExp.id) && (
+            editable && userExp && (userExp.type == 6 || userMsg.creator == userExp.id) && (
               <View className={more ? 'more-active more' : 'more'}>
                 <Image className='icon' src={caozuo} onClick={(e)=>{setMore(!more);e.stopPropagation()}}></Image>
                 <View className='post-manage'>

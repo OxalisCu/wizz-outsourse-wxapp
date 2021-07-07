@@ -3,6 +3,7 @@ import Taro, {useRouter, useDidHide} from '@tarojs/taro'
 import {View, Text} from '@tarojs/components'
 import UserCard from '../../../components/posts/userCard/index'
 import CommentBar from '../../../components/posts/commentBar/index'
+import UserNav from '../../../components/userNav/index'
 import Modal from '../../../components/modal/index'
 import {CommentItem, UserExp} from '../../../model/api/index'
 import {useStore} from '../../../model/store/index'
@@ -56,6 +57,7 @@ export default () => {
     mActions.openModal({
       page: 'commentDetail',
       mask: 'commentEditor',
+      detail: true
     })
     oActions.addComment({
       toId,
@@ -76,6 +78,7 @@ export default () => {
       oActions.delComment({
         toId,
         postId: postId,
+        type: 0
       })
     }
   }
@@ -141,10 +144,12 @@ export default () => {
                 >
                   {
                     (item.reply == commentDetail[0].id) ? ('') :(
-                      <Text className='reply-tip'>
-                        <Text>{'回复 '}</Text>
-                        <Text>{map[item.reply] + '：'}</Text>
-                      </Text>
+                      <View className='reply-tip'>
+                        <Text className='tip-type'>{'回复 '}</Text>
+                        <UserNav>
+                          <Text className='tip-user'>{map[item.reply] + '：'}</Text>
+                        </UserNav>
+                      </View>
                     )
                   }
                   <Text className='reply-text'>{item.content}</Text>

@@ -25,10 +25,13 @@ interface AddComment{
 interface DelComment{
   postId?: number,
   toId?: number,
+  type?: number
 }
 
 interface LikeOperate{
   postId: number,
+  userId: number,
+  userName: string,
   open: boolean
 }
 

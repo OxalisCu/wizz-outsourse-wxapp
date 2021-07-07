@@ -6,7 +6,7 @@ import './index.scss'
 
 export default (props) => {
 
-  const {id, name} = props;
+  const {id} = props;
 
   const userNav = () => {
     Taro.navigateTo({
@@ -15,7 +15,7 @@ export default (props) => {
   }
 
   return (
-    <View className='user-nav-container' onClick={userNav}>
+    <View className='user-nav-container' onClick={(e)=>{userNav();e.stopPropagation()}}>
       {props.children}
     </View>
   )

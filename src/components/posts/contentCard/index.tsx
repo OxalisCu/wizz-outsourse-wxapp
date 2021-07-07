@@ -16,6 +16,7 @@ import zan_active from '../../../images/zan_active.png'
 import pinglun from '../../../images/pinglun.png'
 import jing from '../../../images/jing.png'
 import jing_active from '../../../images/jing_active.png'
+import { useImperativeHandle } from 'react'
 
 interface Zone{
   title: string
@@ -65,11 +66,41 @@ export default (props) => {
   }, [])
 
   // 点赞
-  const like = () => {    
-    oActions.likeOperate({
-      postId: contentMsg.id,
-      open: true
-    })
+  const like = async () => {  
+    if(!isPay){
+      oActions.likeOperate(null);
+      Taro.showToast({
+        title: '免费用户不能点赞',
+        icon: 'none'
+      })
+      return;
+    }
+
+    let likeRes;
+    if(likeMsg.isLiked){
+      likeRes = await deleteLike({
+        id: contentMsg.id
+      })
+    }else{
+      likeRes = await putLike({
+        id: contentMsg.id
+      })
+    }
+
+    if(likeRes.data.success){
+      oActions.likeOperate({
+        postId: contentMsg.id,
+        userId: userMsg.creator,
+        userName: userMsg.creatorName,
+        open: true
+      })
+    }else{
+      oActions.likeOperate(null);
+      Taro.showToast({
+        title: likeRes.data.message,
+        icon: 'none'
+      })
+    }
   }   
 
   useEffect(() => {
@@ -78,69 +109,43 @@ export default (props) => {
         if(likeMsg == null || oState.likeOperate == null || !oState.likeOperate.open || oState.likeOperate.postId != contentMsg.id){
           oActions.likeOperate(null);
           return;
-        }else if(!isPay){
-          oActions.likeOperate(null);
-          Taro.showToast({
-            title: '免费用户不能点赞',
-            icon: 'none'
-          })
-          return;
         }
         
-        let likeRes;
-        if(likeMsg.isLiked){
-          likeRes = await deleteLike({
-            id: contentMsg.id
-          })
-        }else{
-          likeRes = await putLike({
-            id: contentMsg.id
-          })
-        }
-
-        console.log('likeRes', likeRes);
-        if(likeRes.data.success){
-          let temp: LikeMsg = {
-            isLiked: false,
-            likeCount: 0,
-            likers: []
-          };
-          if(likeMsg.isLiked){    // 取消点赞
-            temp.isLiked = false;
-            temp.likeCount = likeMsg.likeCount - 1;
-            temp.likers = [];
-            likeMsg.likers.map((item, index) => {   // 清除用户点赞数据
-              if(userExp.id != item.id){
-                temp.likers.push({...item});
-              }
-            })    
-          }else{    // 点赞
-            temp.isLiked = true;
-            temp.likeCount = likeMsg.likeCount + 1;
-            temp.likers = [];
-            likeMsg.likers.map((item, index) => {   // 添加用户点赞数据
+        console.log('like', oState.likeOperate);
+        let temp: LikeMsg = {
+          isLiked: false,
+          likeCount: 0,
+          likers: []
+        };
+        if(likeMsg.isLiked){    // 取消点赞
+          temp.isLiked = false;
+          temp.likeCount = likeMsg.likeCount - 1;
+          temp.likers = [];
+          likeMsg.likers.map((item, index) => {   // 清除用户点赞数据
+            if(userExp.id != item.id){
               temp.likers.push({...item});
-            })
-            temp.likers.unshift({
-              id: userExp.id,
-              name: nickName
-            });
-          }
-          setLikeMsg(temp);
-
-          console.log('likeMsg', temp);
-        }else{
-          Taro.showToast({
-            title: likeRes.data.message,
-            icon: 'none'
+            }
+          })    
+        }else{    // 点赞
+          temp.isLiked = true;
+          temp.likeCount = likeMsg.likeCount + 1;
+          temp.likers = [];
+          likeMsg.likers.map((item, index) => {   // 添加用户点赞数据
+            temp.likers.push({...item});
           })
+          temp.likers.unshift({
+            id: userExp.id,
+            name: nickName
+          });
         }
+        setLikeMsg(temp);
+
+        console.log('likeMsg', temp);
 
         oActions.likeOperate(null);
       }
     )()
   }, [oState.likeOperate])
-
 
   return (
     <View className='content-container'>

@@ -26,6 +26,7 @@ export default () => {
   const [oState, oActions] = useStore('Operate');
 
   useEffect(() => {
+    // console.log('keyBoard', mState.detail);
     try{
       const exp = Taro.getStorageSync('userExp');
       const name = Taro.getStorageSync('nickName');
@@ -42,7 +43,7 @@ export default () => {
     if(oState.addComment != null){
       setToType(oState.addComment.type === 1 ? '评论' : '回复');
     }
-  }, [mState.addComment])
+  }, [oState.addComment])
 
   const submitCom = (e) => {  //提交评论
     (
@@ -91,9 +92,9 @@ export default () => {
     }
   }
 
-  // const changeHeight = (e) => {    // 键盘高度改变
-  //   console.log(e.detail.height);
-  // }   
+  const changeHeight = (e) => {    // 键盘高度改变
+    console.log(e.detail.height);
+  }   
 
   // 获取键盘高度
   // useEffect(() => {
@@ -118,9 +119,9 @@ export default () => {
           showConfirmBar={false}
           maxlength={500}
           autoFocus
-          fixed
+          cursorSpacing={mState.detail ? 180 : 10}
           onInput={getInput}
-          // onKeyboardHeightChange={changeHeight} 
+          onKeyboardHeightChange={changeHeight} 
         />
         <View className='operate-line'>
           {/* <Image className='left' src={biaoqing}></Image> */}

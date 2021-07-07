@@ -67,6 +67,10 @@ export default () => {
 
   const [loading, setLoading] = useState<number>(-1);
 
+  // 允许上传的文件和图片数
+  const imgNum = 9;
+  const fileNum = 3;
+
   const [mState, mActions] = useStore('Modal');
   const [rState, rActions] = useStore('Refresh');
  
@@ -314,6 +318,7 @@ export default () => {
   }, [upload])
 
   useEffect(() => {
+    console.log('loading', loading);
     if(loading == 0){
       Taro.hideToast();
       Taro.showToast({
@@ -338,19 +343,19 @@ export default () => {
       }
     } 
   } ,[loading])
-  
+
   const chooseImg = () => {
-    if(images.length == 9){
+    if(images.length == imgNum){
       Taro.showToast({
-        title: '最多选择9张图片',
+        title: '最多选择' + imgNum + '张图片',
         icon: 'none'
       })
       return;
     }
 
-    console.log(images.length);
+    // console.log(images.length);
     Taro.chooseImage({
-      count: 9 - images.length,
+      count: imgNum - images.length,
       success: function(res){
         let [...temp] = images;
         res.tempFiles.map(item => {
@@ -369,9 +374,9 @@ export default () => {
   }
 
   const chooseFile = () => {
-    if(files.length == 9){
+    if(files.length == fileNum){
       Taro.showToast({
-        title: '最多选择9份文件',
+        title: '最多选择' + fileNum + '份文件',
         icon: 'none'
       })
       return;
@@ -379,7 +384,7 @@ export default () => {
 
     // console.log(files.length);
     Taro.chooseMessageFile({
-      count: 9 - files.length,
+      count: fileNum - files.length,
       type: 'file',
       extension: ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf'],
       success: function (res) {

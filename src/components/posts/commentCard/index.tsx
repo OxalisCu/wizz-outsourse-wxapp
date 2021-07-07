@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import {View, Text, Image} from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import UserCard from '../userCard/index'
+import UserNav from '../../userNav'
 import {CommentItem, UserMsg, UserExp} from '../../../model/api/index'
 
 import './index.scss'
@@ -51,7 +52,7 @@ export default (props) => {
           userType: commentItem[0].userType
         }}
       />
-      <View className='main-content' onClick={(e)=>{commentEditor(commentItem[0].id, commentItem[0].userName)}} onLongPress={()=>{commentDelete(commentItem[0].id)}}>
+      <View className='main-content' onClick={(e)=>{commentEditor(commentItem[0].id, commentItem[0].userName)}} onLongPress={()=>{commentDelete(commentItem[0].id, 1)}}>
         <Text>{commentItem[0].content}</Text>
       </View>
 
@@ -65,10 +66,14 @@ export default (props) => {
                 return '';
               }else{
                 return (  
-                  <View className='reply-item' key={item.id} onClick={(e)=>{commentEditor(item.id, item.userName)}} onLongPress={()=>{commentDelete(item.id)}}>
-                    <Text className='name'>{item.userName}</Text>
+                  <View className='reply-item' key={item.id} onClick={(e)=>{commentEditor(item.id, item.userName)}} onLongPress={()=>{commentDelete(item.id, 0)}}>
+                    <UserNav>
+                      <Text className='name'>{item.userName}</Text>
+                    </UserNav>
                     <Text className='between'>回复</Text>
-                    <Text className='name'>{map[item.reply] != undefined ? map[item.reply] : '已删除'}：</Text>
+                    <UserNav>
+                      <Text className='name'>{map[item.reply] != undefined ? map[item.reply] : '已删除'}：</Text>
+                    </UserNav>
                     <Text className='content'>{item.content}</Text>
                   </View>
                 )

@@ -19,6 +19,7 @@ type pageType =
 interface OpenModal {
   mask: maskType,
   page: pageType,
+  detail?: boolean    // 是否为详情页，调整 textarea 与键盘高度用
 }
 
 interface CloseModal{
@@ -45,6 +46,7 @@ const model: ModelType<StateType, ActionType> = {
       return {
         mask: data.mask,
         page: data.page,
+        detail: data.detail || false,
         success: ''
       }
     },

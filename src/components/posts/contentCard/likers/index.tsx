@@ -11,7 +11,7 @@ export default (props) => {
 
   const likeMsg: LikeMsg | null = props.likeMsg;
 
-  return likeMsg != null && likeMsg.isLiked && (
+  return likeMsg != null && likeMsg.likers.length > 0 && (
     <View className='likers-container'>
       <Image className='icon' src={zan_small}></Image>
       {

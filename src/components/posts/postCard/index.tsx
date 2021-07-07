@@ -51,6 +51,7 @@ export default (props) => {
     mActions.openModal({
       mask: 'commentEditor',
       page: 'posts',
+      detail: false
     })
     oActions.addComment({
       toId,
@@ -164,6 +165,7 @@ export default (props) => {
             avatar: postData.avatar,
             userType: postData.userType
           }}
+          editable
           editPost={editPost}
           deletePost={deletePost}
         />

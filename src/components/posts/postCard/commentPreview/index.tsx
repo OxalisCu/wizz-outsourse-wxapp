@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import {View, Text, Image} from '@tarojs/components'
 import Taro from '@tarojs/taro'
+import UserNav from '../../../userNav'
 import {CommentItem} from '../../../../model/api/index'
 
 import './index.scss'
@@ -36,17 +37,23 @@ export default (props) => {
           return msg.map((item, i2) => {
             if(item.reply == null){
               return (  
-                <View className='comment-item' key={item.id} onClick={(e)=>{commentEditor(item.id, item.userName)}}>
-                  <Text className='name'>{item.userName}：</Text>   
+                <View className='posts-comment-item' key={item.id} onClick={(e)=>{commentEditor(item.id, item.userName)}}>
+                  <UserNav>
+                    <Text className='name'>{item.userName}：</Text>   
+                  </UserNav>
                   <Text className='content'>{item.content}</Text>
                 </View>
               )
             }else if(i2 < 6){
               return (
-                <View className='reply-item' key={item.id} onClick={(e)=>{commentEditor(item.id, item.userName)}}>
-                  <Text className='name'>{item.userName}</Text>
+                <View className='posts-reply-item' key={item.id} onClick={(e)=>{commentEditor(item.id, item.userName)}}>
+                  <UserNav>
+                    <Text className='name'>{item.userName}</Text>
+                  </UserNav>
                   <Text className='between'>回复</Text>
-                  <Text className='name'>{map[item.reply] != undefined ? map[item.reply] : '已删除'}：</Text>
+                  <UserNav>
+                    <Text className='name'>{map[item.reply] != undefined ? map[item.reply] : '已删除'}：</Text>
+                  </UserNav>
                   <Text className='content'>{item.content}</Text>
                 </View>
               )

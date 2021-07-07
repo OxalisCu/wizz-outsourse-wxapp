@@ -23,11 +23,15 @@
       .reply-content{
         margin: 20px 0 0 90px;
         line-height: 45px;
-        .reply-tip Text:first-child{
-          color: #999999;
-        }
-        .reply-tip Text:last-child{
-          color: #729BBB;
+        .reply-tip{
+          display: inline-block;
+          .tip-type{
+            color: #999999;
+          }
+          .tip-user{
+            margin-left: 10px;
+            color: #729BBB;
+          }
         }
         .reply-text{
           word-break: break-all;

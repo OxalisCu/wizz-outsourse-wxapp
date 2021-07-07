@@ -7,8 +7,7 @@ export default {
     'pages/posts/postEditor/index',
     'pages/user/user/index',
     'pages/user/msgs/index',
-    'pages/user/records/index',
-    'pages/demo/index'
+    'pages/user/records/index'
   ],
   window: {
     backgroundTextStyle: 'light',
