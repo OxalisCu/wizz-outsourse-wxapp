@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Taro, {useReachBottom, useTabItemTap, usePageScroll} from '@tarojs/taro'
+import Taro, {useReachBottom, useTabItemTap, usePageScroll, useDidShow} from '@tarojs/taro'
 import {View, Input, Image, Text} from '@tarojs/components'
 import {AtTabs, AtTabsPane, AtMessage} from 'taro-ui'
 import PostCard from '../../../components/posts/postCard/index'
@@ -93,6 +93,11 @@ export default () => {
         }
       }catch(err){console.log(err)}
     }
+  })
+
+  // 每次进入页面更新用户经验信息
+  useDidShow(() => {
+    loadUserExp();
   })
 
   // 从 LoginModal 获悉是否登录，登录则加载帖子信息
