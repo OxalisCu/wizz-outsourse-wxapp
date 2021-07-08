@@ -52,7 +52,7 @@ export default (props) => {
           userType: commentItem[0].userType
         }}
       />
-      <View className='main-content' onClick={(e)=>{commentEditor(commentItem[0].id, commentItem[0].userName)}} onLongPress={()=>{commentDelete(commentItem[0].id, 1)}}>
+      <View className='main-content' onClick={(e)=>{commentEditor(commentItem[0].id, commentItem[0].userName)}} onLongPress={()=>{commentDelete(commentItem[0].id, commentItem[0].user, 1)}}>
         <Text>{commentItem[0].content}</Text>
       </View>
 
@@ -66,7 +66,7 @@ export default (props) => {
                 return '';
               }else{
                 return (  
-                  <View className='reply-item' key={item.id} onClick={(e)=>{commentEditor(item.id, item.userName)}} onLongPress={()=>{commentDelete(item.id, 0)}}>
+                  <View className='reply-item' key={item.id} onClick={(e)=>{commentEditor(item.id, item.userName)}} onLongPress={()=>{commentDelete(item.id, item.user, 0)}}>
                     <UserNav>
                       <Text className='name'>{item.userName}</Text>
                     </UserNav>

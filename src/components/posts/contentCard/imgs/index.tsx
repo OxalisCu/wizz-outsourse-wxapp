@@ -79,7 +79,7 @@ export default (props) => {
     Taro.previewImage({
       current: images[index], // 当前显示图片的http链接
       urls: images,   // 需要预览的图片http链接列表
-      showmenue: {false},
+      showMenue: {false},
       fail(err){console.log(err)}
     })
   }

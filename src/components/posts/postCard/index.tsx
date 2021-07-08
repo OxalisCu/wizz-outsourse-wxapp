@@ -11,6 +11,7 @@ import './index.scss'
 
 export default (props) => {
   const postData: PostMsg = props.postData;
+  const curZone: number = props.curZone;
   const [userExp, setUserExp] = useState<UserExp>();
   const [isPay, setIsPay] = useState<boolean>();
 
@@ -143,7 +144,11 @@ export default (props) => {
         title: '帖子删除成功',
         icon: 'none',
         success(res){
-          rActions.refresh(true);
+          console.log('delete');
+          rActions.refresh({
+            open: true,
+            zone: -1
+          });
         }
       })
     }else{
@@ -199,6 +204,7 @@ export default (props) => {
             isLiked: postData.isLiked,
             likers: postData.likers,
           }}
+          curZone={curZone}
           commentEditor={commentEditor}
           viewDetail={viewDetail}
         />

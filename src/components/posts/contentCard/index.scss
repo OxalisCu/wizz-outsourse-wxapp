@@ -12,9 +12,10 @@
   }
   .component{
     margin: 30px 0;
-    height: 60px;
+    line-height: 60px;
     display: flex;
     .zones{
+      flex: 1 1 1;
       display: flex;
       flex-wrap: wrap;
       flex: 1 1 auto;
@@ -42,10 +43,12 @@
       }
     }
     .operate{
+      flex: 0 0 auto;
+      width: 160px;
+      height: 60px;
+      padding-right: 30px;
       display: flex;
-      align-items: center;
-      justify-content: space-evenly;
-      padding: 0 20px 0 20px;
+      justify-content: space-between;
       .like{
         width: 60px;
         height: 100%;
@@ -60,7 +63,7 @@
       .comment{
         width: 60px;
         height: 100%;
-        margin-right: 50px;
+        padding-top: 5px;
         display: flex;
         justify-content: center;
         align-items: center;

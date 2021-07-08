@@ -336,7 +336,10 @@ export default () => {
           Taro.navigateBack({
             delta: 1,
             success(res){
-              rActions.refresh(true);
+              rActions.refresh({
+                open: true,
+                zone: zoneChoice
+              });
             }
           })
         }, 100)

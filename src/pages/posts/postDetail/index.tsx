@@ -22,6 +22,7 @@ export default () => {
   const [mState, mActions] = useStore('Modal');
   const [oState, oActions] = useStore('Operate');
   const [rState, rActions] = useStore('Refresh');
+  const [hState, hActions] = useStore('Hide');
 
   useEffect(() => {
     try{
@@ -78,8 +79,8 @@ export default () => {
   }
 
   // 管理员、帖子创建者、评论发表者删除评论
-  const commentDelete = (toId: number, type: number) => {
-    if(userExp.type == 6 || userExp.id == postData.creator || userExp.id == postData.creator){
+  const commentDelete = (toId: number, userId: number, type: number) => {
+    if(userExp.type == 6 || userExp.id == postData.creator || userExp.id == userId){
       mActions.openModal({
         mask: 'commentDelete',
         page: 'postDetail',
@@ -176,7 +177,7 @@ export default () => {
   } 
 
   return postData != null && (
-    <View className='post-detail-container'>
+    <View className='post-detail-container' onClick={()=>{hActions.hide(Math.random());}}>
       <View className='up'>
         <UserCard 
           userMsg={{
@@ -222,7 +223,7 @@ export default () => {
       </View>
     
       <View className='bottom'>
-        <View className='comment-num'>评论（{postData.comments.length}）</View>
+        <View className='comment-num'>评论（{commentMsg.length}）</View>
         {
           commentMsg.length != 0 && (
             commentMsg.map((item, index) => {
@@ -242,7 +243,7 @@ export default () => {
         }
       </View>
 
-      <View onClick={()=>{commentEditor(null, null);console.log('demo')}}>
+      <View onClick={()=>{commentEditor(null, null);}}>
         <CommentBar />
       </View>
 

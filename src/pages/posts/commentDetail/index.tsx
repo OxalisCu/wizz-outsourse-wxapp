@@ -147,7 +147,7 @@ export default () => {
                       <View className='reply-tip'>
                         <Text className='tip-type'>{'回复 '}</Text>
                         <UserNav>
-                          <Text className='tip-user'>{map[item.reply] + '：'}</Text>
+                          <Text className='tip-user'>{(map[item.reply] != undefined ? map[item.reply] : '已删除') + '：'}</Text>
                         </UserNav>
                       </View>
                     )

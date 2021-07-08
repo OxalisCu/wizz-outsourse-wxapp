@@ -3,8 +3,9 @@ import Modal from './modal'
 import Wrap from './wrap'
 import Refresh from './refresh'
 import Operate from './operate'
+import Hide from './hide'
 
-const models = { Modal, Wrap, Refresh, Operate }
+const models = { Modal, Wrap, Refresh, Operate, Hide }
 
 export const {
   getInitialState,

@@ -15,12 +15,11 @@ export default () => {
   const [userAvatar, setUserAvatar] = useState();
 
   const [toType, setToType] = useState<string>('');
-
-  // var keyBoardHeight = 0;   // 存储键盘高度信息
-
   const [comment, setComment] = useState('');
   const [words, setWords] = useState(0);
-  // const [bottomHeight, setBottomHeight] = useState(40);
+
+  // 评论后立即隐藏评论框，但是不卸载评论框组件，等待操作返回结果
+  const [hidden, setHidden] = useState(false);
 
   const [mState, mActions] = useStore('Modal');
   const [oState, oActions] = useStore('Operate');
@@ -48,6 +47,8 @@ export default () => {
   const submitCom = (e) => {  //提交评论
     (
       async ()=>{
+        // setHidden(true);
+
         setComment(removeSpace(e.detail.value.comment));
         const commentRes = await postComment({
           toType: oState.addComment.type,
@@ -101,8 +102,9 @@ export default () => {
     
   // }, [])
 
-  return (
-    <View className='comment-editor-container' onClick={(e)=>{e.stopPropagation();}}>
+  return !hidden && <>
+    <View className='mask' key={1} catchMove onClick={(e)=>{mActions.closeModal({success: ''}); e.stopPropagation();}}></View>
+    <View className='comment-editor-container' key={2} onClick={(e)=>{e.stopPropagation();}}>
       <Form onSubmit={submitCom}>
         {
           toType != '' && (
@@ -136,5 +138,5 @@ export default () => {
         </View>
       </Form>
     </View>
-  )
+  </>
 }

@@ -14,7 +14,7 @@ export default (props) => {
 
   return (
     mState.page == page && mState.mask && (
-      <View className='mask' catchMove onClick={(e)=>{mActions.closeModal({success: ''}); e.stopPropagation();}}>
+      <>
         {
           mState.mask == 'commentEditor' && (
             <CommentEditor />
@@ -30,7 +30,7 @@ export default (props) => {
             <PostCancel />
           )
         }
-      </View>
+      </>
     )
   )
 }

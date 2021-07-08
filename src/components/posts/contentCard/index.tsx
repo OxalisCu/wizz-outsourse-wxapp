@@ -27,6 +27,7 @@ export default (props) => {
   const userMsg: UserMsg = props.userMsg;
   const contentMsg: ContentMsg = props.contentMsg;
   const zoneMsg: ZoneMsg = props.zoneMsg;
+  const curZone: number = props.curZone;
   
   const [likeMsg, setLikeMsg] = useState<LikeMsg>();
 
@@ -166,24 +167,30 @@ export default (props) => {
       </View>
 
       <View className='component'>
-        <View className='zones'>
-          {
-            zoneMsg.awesome && (
-              <View className='zone-awesome'>
-                <Image className='icon' src={jing_active}></Image>
-                精品
-              </View>
-            )
-          }
-          {
-            zones.length != 0 && zoneMsg.zone > 0 && <View className='zone-item'>
-            <Text>#</Text>
-            <Text>{zones[zoneMsg.zone].title}</Text>
-          </View>
-          }
-        </View>
         {
-          !detail && likeMsg != null && (
+          curZone < 2 ? (
+            <View className='zones'>
+              {
+                zoneMsg.awesome && (
+                  <View className='zone-awesome'>
+                    <Image className='icon' src={jing_active}></Image>
+                    精品
+                  </View>
+                )
+              }
+              {
+                zones != null && zones.length != 0 && zoneMsg.zone > 0 && <View className='zone-item'>
+                <Text>#</Text>
+                <Text>{zones[zoneMsg.zone].title}</Text>
+              </View>
+              }
+            </View>
+          ) : (
+            <View className='zones'></View>
+          )
+        }
+        {
+          (!detail && likeMsg != null ) && (
             <View className='operate'>
               <View className='comment'>
                 <Image className='icon' src={pinglun} onClick={()=>{commentEditor(null, null)}}></Image>

@@ -28,7 +28,9 @@ export default () => {
   const [posts, setPosts] = useState<Array<Array<PostMsg>>>([]);   // 获取当前分区帖子信息
   const [isPay, setIsPay] = useState<boolean>();    // 是否付费
 
-  const [current, setCurrent] = useState(0);    // 当前选择分区
+  const [current, setCurrent] = useState<number>(0);    // 当前选择分区
+  const [curSymbol, setCurSymbol] = useState<symbol>(Symbol(0));
+
   const [page, setPage] = useState(1);    // 当前第几页
   const [loadOnce, setLoadOnce] = useState(false);
   const [postMap, setPostMap] = useState<Array<boolean>>([]);
@@ -42,6 +44,7 @@ export default () => {
   const [contentHeight, setContentHeight] = useState<number>(0);
 
   const [rState, rActions] = useStore('Refresh');
+  const [hState, hActions] = useStore('Hide');
 
   //  初次进入社区
   useEffect(() => {
@@ -93,6 +96,7 @@ export default () => {
         }
       }catch(err){console.log(err)}
     }
+    hActions.hide(Math.random());
   })
 
   // 每次进入页面更新用户经验信息
@@ -127,6 +131,7 @@ export default () => {
     console.log('loadPosts');
 
     let zoneRes = await getZones();
+
     let zoneData = [{title: '全部'}, {title: '精品'}];
     zoneRes.data.data.map((item, index) => {
       zoneData[item.id] = {
@@ -138,6 +143,7 @@ export default () => {
     setRefresh(true);
     setPage(1);
     setCurrent(0);
+    setCurSymbol(Symbol(0));
     await loadPage(0, 1, false);
     setZones(zoneData);
     setRefresh(false);
@@ -192,15 +198,42 @@ export default () => {
   // 换分区
   const changeZone = async (index) => {
     setCurrent(index);
-    setPage(1);
-    setRefresh(true);
-    Taro.pageScrollTo({
-      scrollTop: 0,
-      duration: 500
-    })
-    await loadPage(index, 1, false);
-    setRefresh(false);
+    setCurSymbol(Symbol(index));
   }
+
+  useEffect(() => {
+    ;(
+      async () => {
+        setPage(1);
+        setRefresh(true);
+        Taro.pageScrollTo({
+          scrollTop: 0,
+          duration: 500
+        })
+        await loadPage(current, 1, false);
+        setRefresh(false);
+      }
+    )()
+  }, [current, curSymbol])
+
+  // 刷新首页
+  useEffect(() => {
+    ;(
+      async() => {
+        if(rState != null && rState.open){
+          console.log(rState);
+          if(rState.zone >= 0){
+            setCurrent(rState.zone);
+            setCurSymbol(Symbol(rState.zone));
+          }else{
+            setCurrent(current);
+            setCurSymbol(Symbol(current));
+          }
+          rActions.refresh(null);
+        }
+      }
+    )()
+  }, [rState.open, rState.openSymbol])
 
   // 触底加载更多数据
   useReachBottom(async() => {
@@ -235,25 +268,6 @@ export default () => {
    
   }, [loadMore])
 
-  // 刷新首页
-  useEffect(() => {
-    ;(
-      async() => {
-        if(rState.open){
-          Taro.pageScrollTo({
-            scrollTop: 0,
-            duration: 500
-          })
-          setRefresh(true);
-          setPage(1);
-          await loadPage(current, 1, false);
-          setRefresh(false);
-          rActions.refresh(false);
-        }
-      }
-    )()
-  }, [rState.open])
-
   // 创建帖子
   const createPost = () => {    // 创建帖子
     if(isPay){
@@ -273,8 +287,8 @@ export default () => {
     
   }
 
-  return  (
-    <View className='posts-container'>
+  return  zones != null && (
+    <View className='posts-container' onClick={()=>{hActions.hide(Math.random())}}>
       {/* 登录弹窗 */}
       <AtMessage></AtMessage>
       {
@@ -312,7 +326,7 @@ export default () => {
           onClick={changeZone}
         >
           {
-            zones.length != 0 &&  zones.map((item, i1) => {
+            zones.length != 0 &&  zones.map((zone, i1) => {
               return (
                 <AtTabsPane current={current} index={i1} key={i1}>
                   <View className='post-tabs' style={{minHeight: contentHeight + 'px'}}>
@@ -332,6 +346,7 @@ export default () => {
                           <View className='post-item' key={item.id}>
                             <PostCard
                               postData={item}
+                              curZone={i1}
                             />
                             <View className='post-divider' />
                           </View>

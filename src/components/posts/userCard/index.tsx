@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from 'react'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import {View, Image, Text} from '@tarojs/components'
 import UserNav from '../../userNav/index'
 import {delPost, UserExp, UserMsg} from '../../../model/api/index'
 import { timeFormat } from '../../../utils'
+import {useStore} from '../../../model/store'
 
 import './index.scss'
 
@@ -22,6 +23,8 @@ export default (props) => {
 
   const rankList = ['免费用户', '小透明', '热心肠', '积极分子', '大佬', '合伙人', '管理员'];
 
+  const [hState, hActions] = useStore('Hide');
+
   useEffect(() => {
     try{
       let exp = Taro.getStorageSync('userExp');
@@ -30,6 +33,10 @@ export default (props) => {
       }
     }catch(err){console.log(err)}
   }, [])
+
+  useEffect(() => {
+    setMore(false);
+  }, [hState.hide])
 
   return userMsg != null && (
     <View className='head-container' onClick={()=>{setMore(false)}}>
@@ -51,8 +58,8 @@ export default (props) => {
           {
             // 自己或管理员可以编辑帖子
             editable && userExp && (userExp.type == 6 || userMsg.creator == userExp.id) && (
-              <View className={more ? 'more-active more' : 'more'}>
-                <Image className='icon' src={caozuo} onClick={(e)=>{setMore(!more);e.stopPropagation()}}></Image>
+              <View className={more ? 'more-active more' : 'more'} onClick={(e)=>{setMore(!more);e.stopPropagation()}}>
+                <Image className='icon' src={caozuo}></Image>
                 <View className='post-manage'>
                   <Text onClick={(e)=>{setMore(!more);editPost();e.stopPropagation()}}>编辑</Text>
                   <Text onClick={(e)=>{setMore(!more);deletePost();e.stopPropagation()}}>删除</Text>

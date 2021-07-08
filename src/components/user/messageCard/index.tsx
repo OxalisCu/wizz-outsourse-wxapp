@@ -42,7 +42,7 @@ export default (props) => {
           <Text className='tip'>
             <Text>{messageMsg.fromType == 2 ? '赞' : '回复'}</Text>
             了你的
-            <Text>{type[messageMsg.toType]}</Text>
+            <Text>{messageMsg.fromType == 2 ? '帖子' : type[messageMsg.toType]}</Text>
           </Text>
         </View>
         {
