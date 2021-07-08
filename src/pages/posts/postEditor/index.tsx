@@ -331,7 +331,7 @@ export default () => {
           icon: 'none'
         })
       }, 50)
-      if(loading == 3 || loading == 2){
+      if(loading >= 2){
         setTimeout(()=>{
           Taro.navigateBack({
             delta: 1,
@@ -433,6 +433,9 @@ export default () => {
       temp2.splice(index-images.length, 1);
       setFiles(temp1);
       setFileName(temp2);
+
+      // console.log(temp1);
+      // console.log(temp2);
     }
   }
 
