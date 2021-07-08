@@ -194,6 +194,10 @@ export default () => {
     setCurrent(index);
     setPage(1);
     setRefresh(true);
+    Taro.pageScrollTo({
+      scrollTop: 0,
+      duration: 500
+    })
     await loadPage(index, 1, false);
     setRefresh(false);
   }
