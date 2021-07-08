@@ -70,13 +70,17 @@ export default (props) => {
     Taro.previewImage({
       current: images[index], // 当前显示图片的http链接
       urls: images,   // 需要预览的图片http链接列表
-      showmenue: {false},
+      showMenue: {false},
       success(res){},
       fail(err){console.log(err)}
     })
   }
 
   const previewFile = (src) => {
+    Taro.showToast({
+      title: '打开文档中...',
+      icon: 'loading'
+    })
     Taro.downloadFile({
       url: src,
       success(res1){
@@ -85,6 +89,18 @@ export default (props) => {
           filePath: filePath,
           success: function (res2) {
             console.log('打开文档成功');
+          },
+          fail: function (err2){
+            console.log(err2);
+            Taro.showToast({
+              title: err2.errMsg,
+              icon: 'none'
+            })
+          },
+          complete: function(msg){
+            setTimeout(()=>{
+              Taro.hideToast();
+            }, 100)
           }
         })
       }
@@ -107,7 +123,7 @@ export default (props) => {
                   </View>
                 ) : (        
                   <View className='item file' onClick={()=>{previewFile(item.src)}}>
-                    <Text className='type'>{(index - images.length < 0 || index - images.length >= fileInfo.length) ? '' : fileInfo[index - images.length].fileType}</Text>
+                    <Text className='type'>{(index - images.length < 0 || index - images.length >= fileInfo.length) ? '' : fileInfo[index - images.length].fileType.toUpperCase()}</Text>
                     <Text className='name'>{(index - images.length < 0 || index - images.length >= fileInfo.length) ? '' : fileInfo[index - images.length].name}</Text>
                     <View className='delete-btn' onClick={(e)=>{deleteFile(index);e.stopPropagation()}}>
                       <Image className='icon' src={deleteBtn}></Image>

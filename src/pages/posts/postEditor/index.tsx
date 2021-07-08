@@ -59,7 +59,7 @@ export default () => {
   // 允许上传
   const [upload, setUpload] = useState<boolean>(false);
 
-  const msgType = ['创建帖子中...', '部分文件上传错误', '帖子创建成功', '帖子修改成功'];
+  const msgType = ['创建帖子中...', '获取文件 url 失败', '部分文件上传错误', '帖子创建成功', '帖子修改成功'];
 
   const [sendAvailable, setSendAvailable] = useState(false);
   const [lineCount, setLineCount] = useState(1);
@@ -69,7 +69,8 @@ export default () => {
 
   // 允许上传的文件和图片数
   const imgNum = 9;
-  const fileNum = 3;
+  const fileNum = 6;
+  const maxSize = 15;   // 15M
 
   const [mState, mActions] = useStore('Modal');
   const [rState, rActions] = useStore('Refresh');
@@ -215,10 +216,7 @@ export default () => {
         if(url.data.success){
           url2.push(url.data.data.url);
         }else{
-          Taro.showToast({
-            title: '获取文件 url 失败',
-            icon: 'none'
-          })
+          setLoading(1);
           setUpload(false);
           return;
         }
@@ -236,7 +234,7 @@ export default () => {
     ;(
       async ()=>{
         if(upload){
-          
+          setLoading(0);
           console.log('uploadFile');
           console.log('url',url);
 
@@ -298,12 +296,12 @@ export default () => {
           if(createRes.data.success){
             if(id == null){
               if(failNums == 0){
-                setLoading(2);
+                setLoading(3);
               }else{
-                setLoading(1);
+                setLoading(2);
               }
             }else{
-              setLoading(3);
+              setLoading(4);
             }
           }else{
             Taro.showToast({
@@ -327,10 +325,12 @@ export default () => {
       })
     }else{
       Taro.hideToast();
-      Taro.showToast({
-        title: msgType[loading],
-        icon: 'none'
-      })
+      setTimeout(() => {
+        Taro.showToast({
+          title: msgType[loading],
+          icon: 'none'
+        })
+      }, 50)
       if(loading == 3 || loading == 2){
         setTimeout(()=>{
           Taro.navigateBack({
@@ -363,6 +363,14 @@ export default () => {
           let type = info[1];
           // 只许上传 jpg 或 png 格式的图片
           if(type === 'jpg' || type === 'jpeg' || type === 'png'){
+            // 不超过 maxSize
+            if(item.size > maxSize*1024*1024){
+              Taro.showToast({
+                title: '单张图片大小超过' + maxSize + 'M',
+                icon: 'none'
+              })
+              return;
+            }
             temp.push(item.path);
           }
         })
@@ -391,6 +399,14 @@ export default () => {
         let [...temp] = files;
         let [...name] = fileName;
         res.tempFiles.map(item => {
+          // 小于 maxSize
+          if(item.size > maxSize*1024*1024){
+            Taro.showToast({
+              title: item.name + '超过' + maxSize + 'M',
+              icon: 'none'
+            })
+            return;
+          }
           temp.push(item.path);
           let demo = getFileInfo(item.name);
           name.push({
@@ -399,7 +415,6 @@ export default () => {
           })
         })
         setFileName(name);
-        // console.log(temp);
         setFiles(temp);
       },
       fail(err){console.log(err)}

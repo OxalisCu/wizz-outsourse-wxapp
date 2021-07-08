@@ -85,6 +85,10 @@ export default (props) => {
   }
 
   const previewFile = (src) => {
+    Taro.showToast({
+      title: '打开文档中...',
+      icon: 'loading'
+    })
     Taro.downloadFile({
       url: src,
       success(res1){
@@ -93,6 +97,18 @@ export default (props) => {
           filePath: filePath,
           success: function (res2) {
             console.log('打开文档成功');
+          },
+          fail: function (err2){
+            console.log(err2);
+            Taro.showToast({
+              title: err2.errMsg,
+              icon: 'none'
+            })
+          },
+          complete: function(msg){
+            setTimeout(()=>{
+              Taro.hideToast();
+            }, 100)
           }
         })
       }
