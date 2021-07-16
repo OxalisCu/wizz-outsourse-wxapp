@@ -57,6 +57,8 @@ export default () => {
         try{
           let id = Taro.getStorageSync('id');
           if(id){
+            console.log('id', id);
+
             setIsLogin(true);
             
             // 使用测试 token
@@ -101,7 +103,9 @@ export default () => {
 
   // 每次进入页面更新用户经验信息
   useDidShow(() => {
-    loadUserExp();
+    if(isLogin){
+      loadUserExp();
+    }
   })
 
   // 从 LoginModal 获悉是否登录，登录则加载帖子信息
@@ -204,6 +208,10 @@ export default () => {
   useEffect(() => {
     ;(
       async () => {
+        if(!isLogin){
+          return;
+        }
+
         setPage(1);
         setRefresh(true);
         Taro.pageScrollTo({

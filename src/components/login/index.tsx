@@ -53,10 +53,10 @@ export default (props) => {
     // 自定义登录
     const data = await login({
       code: Taro.getStorageSync('code'),
-      // iv: userRes.iv,
-      // encryptedData: userRes.encryptedData
-      iv: userProfileRes.iv,
-      encryptedData: userProfileRes.encryptedData
+      iv: userRes.iv,
+      encryptedData: userRes.encryptedData
+      // iv: userProfileRes.iv,
+      // encryptedData: userProfileRes.encryptedData
     })
     // id
     console.log('id', data);
